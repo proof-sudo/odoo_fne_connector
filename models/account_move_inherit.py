@@ -65,9 +65,10 @@ class AccountInvoice(models.Model):
     def _compute_custom_taxes(self):
         """Agrège les taxes non TVA (autres prélèvements) au niveau racine."""
         customs = {}
-        # CORRECTION 1 : Utiliser 'l.product_id' pour filtrer les lignes AVEC un produit
+        # CORRECTION 1a: Remplacer 'not l.product_ids' par 'l.product_id'
         for line in self.invoice_line_ids.filtered(lambda l: l.product_id): 
-            for tax in line.tax_ids:
+            # CORRECTION 1b: Remplacer 'line.tax_ids' par 'line.invoice_line_tax_ids'
+            for tax in line.invoice_line_tax_ids: 
                 tg = (tax.tax_group_id and tax.tax_group_id.name or "").upper()
                 if "TVA" in tg:
                     continue
