@@ -156,11 +156,11 @@ class AccountInvoice(models.Model):
 
         
         template = "B2B" if invoice.partner_id.vat else "B2C"
-        mode_paiement = invoice.mode_paiement or 'cheque'
+        mode_paiement = invoice.mode_paiement or 'check'
 
         return {
             "invoiceType": invoice_type,
-            "paymentMethod":_clean_str(mode_paiement or "cheque"),
+            "paymentMethod":_clean_str(mode_paiement or "check"),
             "template": template,
             "isRne": False,
             "rne": "",
