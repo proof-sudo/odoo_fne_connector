@@ -320,15 +320,25 @@ class AccountInvoice(models.Model):
     def _post_refund_to_fne(self, headers, base_url):
         self.ensure_one()
         refund_move = self
-        origin = refund_move.reversed_entry_id 
+
+        if not refund_move.origin:
+             raise UserError(_("Le champ 'Origin' est manquant sur l'avoir %s. Impossible de trouver la facture originale.") % refund_move.name)
+            
+        # Recherche de la facture originale par son numéro (dans le champ 'origin')
+        origin = self.env['account.invoice'].search([
+            ('number', '=', refund_move.origin), 
+            ('type', 'in', ('out_invoice', 'in_invoice')) # Cherche la facture, pas un autre avoir
+        ], limit=1)
+
         if not origin:
-            raise UserError(_("Facture d'origine introuvable pour l’avoir %s") % refund_move.name)
+            raise UserError(_("Facture d'origine introuvable (numéro %s) pour l’avoir %s") % (refund_move.origin, refund_move.name))
 
         if not origin.invoice_id_from_fne:
             raise UserError(_("ID FNE de la facture d'origine manquant pour l’avoir %s") % refund_move.name)
         
         _logger.info("[FNE] REFUND %s -> Recherche lignes originales de %s", refund_move.name, origin.name)
 
+        # Reste du code inchangé...
         items = []
         
         # CORRECTION LOGIQUE DE RECHERCHE D'ORIGINE : on se base sur les produits
