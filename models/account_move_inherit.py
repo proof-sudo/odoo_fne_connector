@@ -324,7 +324,7 @@ class AccountInvoice(models.Model):
         # CORRECTION LOGIQUE DE RECHERCHE D'ORIGINE : on se base sur les produits
         origin_lines_map = {
             line.product_id.id: line
-            for line in origin.invoice_line_ids.filtered(lambda l: not l.product_ids and l.fne_item_id)
+            for line in origin.invoice_line_ids.filtered(lambda l: not l.product_id and l.fne_item_id)
         }
         
         for line in refund_move.invoice_line_ids.filtered(lambda l: not l.product_ids):
