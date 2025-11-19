@@ -41,13 +41,13 @@ class AccountInvoice(models.Model):
     mode_paiement = fields.Selection(
         selection=[
             ('mobile_money', 'Mobile Money'),
-            ('cash', 'Espèces'),
-            ('transfer', 'Virement Bancaire'),
-            ('check', 'Chèque'),
+            ('espece', 'Espèces'),
+            ('virement', 'Virement Bancaire'),
+            ('cheque', 'Chèque'),
             ('deferred', 'A terme'),
             ('card', 'Carte Bancaire'),],
         string="Mode de paiement",
-        default='mobile_money',
+        default='cheque',
         help="Sélectionnez le mode de paiement pour la facture.",
     )
     
@@ -156,11 +156,11 @@ class AccountInvoice(models.Model):
 
         
         template = "B2B" if invoice.partner_id.vat else "B2C"
-        mode_paiement = invoice.mode_paiement or 'mobile_money'
+        mode_paiement = invoice.mode_paiement or 'cheque'
 
         return {
             "invoiceType": invoice_type,
-            "paymentMethod":_clean_str(mode_paiement or "mobile_money"),
+            "paymentMethod":_clean_str(mode_paiement or "cheque"),
             "template": template,
             "isRne": False,
             "rne": "",
