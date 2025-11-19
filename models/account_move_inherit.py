@@ -239,9 +239,9 @@ class AccountInvoice(models.Model):
         
         # --- MEILLEURE PRATIQUE : Lecture directe du paramètre ---
         config = self.env['ir.config_parameter'].sudo()
-        api_key = config.get_param('fne.api_key')
+        api_key = config.get_param('fne.api_key') or "Nblg5BBvdRb02ksRTL6Ej2ZMUD7N8YLb"
         mode = (config.get_param('fne.mode', 'test') or 'test').lower()
-        base_url = (config.get_param('fne.test_url') if mode == 'test' else config.get_param('fne.prod_url')) or ""
+        base_url = (config.get_param('fne.test_url' or "http://54.247.95.108/ws") if mode == 'test' else config.get_param('fne.prod_url')) or ""
         # --------------------------------------------------------
 
         # --- AJOUT DU LOGGING POUR LE DEBUGAGE (API Key / Mode / URL) ---
