@@ -46,10 +46,7 @@
 
                 </header>
                 
-                <!-- Zone de contenu (après payment_reference) -->
-                <xpath expr="//field[@name='payment_reference']" position="after">
-                    <field name="mode_de_paiement"/>
-                </xpath>
+              
 
                 <!-- Affichage des informations de référence DGI -->
                 <notebook position="before">

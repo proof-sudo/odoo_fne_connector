@@ -25,11 +25,12 @@ def _truncate(s, n):
     return s[:n]
 
 class AccountMoveLine(models.Model):
-    _inherit = 'account.move.line'
+    _inherit = 'account.invoice.line'
     fne_item_id = fields.Char(string="Item ID FNE", copy=False)
 
 class AccountMove(models.Model):
-    _inherit = 'account.move'
+    _inherit = 'account.invoice' 
+
 
     fne_sent = fields.Boolean(string="Certifier la facture", default=False,copy=False)
     fne_reference_dgi = fields.Char(string="Référence DGI", readonly=True, copy=False)
@@ -37,7 +38,7 @@ class AccountMove(models.Model):
     invoice_id_from_fne = fields.Char(string="ID FNE", readonly=True, copy=False)
     fne_warning = fields.Boolean(string="Avertissement FNE", readonly=True, copy=False)
     fne_balance_sticker = fields.Integer(string="Solde sticker FNE", readonly=True, copy=False)
-    mode_de_paiement = fields.Selection(
+    mode_paiement = fields.Selection(
         selection=[
             ('mobile-money', 'Mobile Money'),
             ('cash', 'Espèces'),
