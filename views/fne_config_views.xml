@@ -30,7 +30,7 @@
             <field name="name">fne.config.settings.tree</field>
             <field name="model">fne.config.settings</field>
             <field name="arch" type="xml">
-                <tree string="Configuration FNE" create="false" delete="false" edit="false">
+                <tree string="Configuration FNE" create="false"  edit="false">
                     <field name="fne_mode" string="Mode"/>
                     <field name="fne_api_key" string="API Key"/>
                     <field name="fne_test_url" string="URL Test"/>
@@ -43,12 +43,10 @@
 
 
         <!-- Action -->
-        <record id="action_fne_config_settings" model="ir.actions.act_window">
+        <record id="action_fne_config_settingss" model="ir.actions.act_window">
             <field name="name">Configuration FNE</field>
             <field name="res_model">fne.config.settings</field>
             <field name="view_mode">tree,form</field>
-            <field name="target">inline</field>
-            <field name="context">{'module' : 'odoo_fne_connector'}</field> 
         </record>
 
 
