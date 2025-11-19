@@ -123,9 +123,12 @@ class AccountMove(models.Model):
 
     def _prepare_base_payload(self, invoice_type):
         invoice = self  
+        
+        # --- MEILLEURE PRATIQUE : Lecture directe du paramètre ---
         config = self.env['ir.config_parameter'].sudo()
         point_de_vente = config.get_param('fne.point_de_vente', 'Default Point of Sale')
         footer= config.get_param('fne.footer', '<p>Merci pour votre confiance</p>')
+        # --------------------------------------------------------
 
         if not point_de_vente:
             raise UserError(_("Le point de vente n'est pas configuré pour le FNE."))
@@ -199,16 +202,6 @@ class AccountMove(models.Model):
             except Exception as e:
                 _logger.warning(f"[FNE] Erreur de mapping d'item FNE pour {self.name}: {e}")
                 
-        # Ancienne logique (par index) : 
-        # for idx, line in enumerate(self.invoice_line_ids):
-        #     if idx < len(items):
-        #         item_id = items[idx].get("id")
-        #         if item_id:
-        #             line.fne_item_id = item_id
-        #         else:
-        #             _logger.warning(f"[FNE] Aucun ID trouvé pour l’item {idx} de la facture {self.name}")
-        #     else:
-        #         _logger.warning(f"[FNE] Pas assez d’items retournés par la DGI pour mapper la ligne {idx} de la facture {self.name}")
     
     
     def _request_fne(self, method, url, headers, json_body=None, retries=2, timeout=30):
@@ -239,10 +232,13 @@ class AccountMove(models.Model):
                 
     def action_send_to_fne(self):
         self.ensure_one()
+        
+        # --- MEILLEURE PRATIQUE : Lecture directe du paramètre ---
         config = self.env['ir.config_parameter'].sudo()
         api_key = config.get_param('fne.api_key')
         mode = (config.get_param('fne.mode', 'test') or 'test').lower()
         base_url = (config.get_param('fne.test_url') if mode == 'test' else config.get_param('fne.prod_url')) or ""
+        # --------------------------------------------------------
 
         if not base_url:
             raise UserError(_("L'URL de l'API FNE n'est pas configurée."))
@@ -354,14 +350,14 @@ class AccountMove(models.Model):
     @api.model
     def action_post(self):
         res = super().action_post()
-        config = self.env['ir.config_parameter'].sudo()
-        # L'utilisation de self.ensure_one() n'est pas nécessaire ici car action_post 
-        # est un décorateur qui s'exécute sur un recordset (possiblement plusieurs factures).
-        # Cependant, action_send_to_fne utilise déjà une boucle for inv in self:
         
-        # Vérifiez que le paramètre est bien un booléen stocké en chaîne 'True'/'False'
+        # --- MEILLEURE PRATIQUE : Lecture directe du paramètre ---
+        config = self.env['ir.config_parameter'].sudo()
+        # Lire la valeur stockée (qui est une chaîne 'True'/'False') et la comparer
         if config.get_param('fne.auto_send', 'False') == 'True':
             self.action_send_to_fne()
+        # --------------------------------------------------------
+        
         return res
     
     def action_open_fne_link(self):
