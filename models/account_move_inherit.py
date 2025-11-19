@@ -40,14 +40,14 @@ class AccountInvoice(models.Model):
     fne_balance_sticker = fields.Integer(string="Solde sticker FNE", readonly=True, copy=False)
     mode_paiement = fields.Selection(
         selection=[
-            ('mobile-money', 'Mobile Money'),
+            ('mobile_money', 'Mobile Money'),
             ('cash', 'Espèces'),
             ('transfer', 'Virement Bancaire'),
             ('check', 'Chèque'),
             ('deferred', 'A terme'),
             ('card', 'Carte Bancaire'),],
         string="Mode de paiement",
-        default='mobile-money',
+        default='mobile_money',
         help="Sélectionnez le mode de paiement pour la facture.",
     )
     
@@ -156,11 +156,11 @@ class AccountInvoice(models.Model):
 
         
         template = "B2B" if invoice.partner_id.vat else "B2C"
-        mode_paiement = invoice.mode_paiement or 'mobile-money'
+        mode_paiement = invoice.mode_paiement or 'mobile_money'
 
         return {
             "invoiceType": invoice_type,
-            "paymentMethod":_clean_str(mode_paiement or "mobile-money"),
+            "paymentMethod":_clean_str(mode_paiement or "mobile_money"),
             "template": template,
             "isRne": False,
             "rne": "",
