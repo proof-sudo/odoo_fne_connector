@@ -116,7 +116,7 @@ class AccountInvoice(models.Model):
                     "quantity": float(line.quantity or 0),
                     "amount": float(line.price_unit or 0),
                     "discount": float(line.discount or 0),
-                    "measurementUnit": _clean_str(line.product_uom_id and line.product_uom_id.name or "pcs"),
+                    "measurementUnit": _clean_str(line.uom_id and line.uom_id.name or "unités"),
                     "taxes": taxes_list,
                 })
             elif self.type == 'in_invoice':
@@ -127,7 +127,7 @@ class AccountInvoice(models.Model):
                     "quantity": float(line.quantity or 0),
                     "amount": float(line.price_unit or 0),
                     "discount": float(line.discount or 0),
-                    "measurementUnit": _clean_str(line.product_uom_id and line.product_uom_id.name or "pcs"),
+                    "measurementUnit": _clean_str(line.uom_id and line.uom_id.name or "unités"),
                 })
         return items
 
