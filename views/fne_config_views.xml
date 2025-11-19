@@ -46,9 +46,9 @@
         <record id="action_fne_config_settings" model="ir.actions.act_window">
             <field name="name">Configuration FNE</field>
             <field name="res_model">fne.config.settings</field>
-            <field name="view_mode">form,tree</field>
-            <field name="view_id" ref="view_fne_config_settings_form"/>
-            <field name="target">current</field>
+            <field name="view_mode">tree,form</field>
+            <field name="target">inline</field>
+            <field name="context">{'module' : 'odoo_fne_connector'}</field> 
         </record>
 
 
