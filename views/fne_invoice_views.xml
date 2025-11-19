@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- ************************************************************ -->
+        <!-- 1. Héritage de la Vue Formulaire (Boutons et Champs Infos) -->
+        <!-- ************************************************************ -->
+        <record id="view_move_form_inherit_fne_main" model="ir.ui.view">
+            <field name="name">account.move.form.inherit.fne.main</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                
+                <!-- Champs de statut (rendus invisibles mais nécessaires pour les conditions) -->
+                <header position="inside">
+                    <field name="fne_sent" invisible="1"/>
+                    <field name="fne_verification_url" invisible="1"/>
+                    <field name="state" invisible="1"/>
+                    <field name="fne_warning" invisible="1"/>
+                    <field name="fne_balance_sticker" invisible="1"/>
+                </header>
+
+                <!-- Zone d'en-tête (Header) -->
+                <header position="inside">
+                    
+                    <!-- Bouton Création FNE (Visible si non envoyé, état n'est pas Brouillon/Annulé) -->
+                    <button name="action_send_to_fne"
+                        string="Créer FNE"
+                        type="object"
+                        class="btn-primary"
+                        attrs="{'invisible': ['|', '|', ('fne_sent', '=', True), ('state', 'in', ['draft', 'cancel'])]}"
+                    />
+
+                    <!-- Bouton Voir FNE (Visible si envoyé) -->
+                    <button name="action_open_fne_link"
+                        string="Voir FNE"
+                        type="object"
+                        class="oe_highlight"
+                        attrs="{'invisible': [('fne_sent', '!=', True)]}"
+                    />
+                    
+                    <!-- Affichage de l'avertissement FNE si présent -->
+                    <label string="Attention: La DGI a renvoyé un avertissement pour cette facture."
+                        attrs="{'invisible': [('fne_warning', '!=', True)]}"
+                        style="color: orange; font-weight: bold; margin-left: 10px;"
+                    />
+
+                </header>
+                
+                <!-- Zone de contenu (après payment_reference) -->
+                <xpath expr="//field[@name='payment_reference']" position="after">
+                    <field name="mode_de_paiement"/>
+                </xpath>
+
+                <!-- Affichage des informations de référence DGI -->
+                <notebook position="before">
+                    <div class="oe_read_only" attrs="{'invisible': [('fne_sent', '!=', True)]}">
+                        <group name="fne_dgi_info" string="Informations de Certification FNE / DGI">
+                            <field name="fne_reference_dgi"/>
+                            <field name="fne_balance_sticker" string="Solde Sticker FNE"/>
+                            <field name="fne_warning" readonly="1" string="Avertissement DGI" attrs="{'invisible': [('fne_warning', '!=', True)]}"/>
+                        </group>
+                    </div>
+                </notebook>
+
+            </field>
+        </record>
+
+        <!-- ************************************************************ -->
+        <!-- 2. Héritage de la Vue Liste (Tree View) -->
+        <!-- ************************************************************ -->
+        <record id="view_move_tree_inherit_fne" model="ir.ui.view">
+            <field name="name">account.move.tree.inherit.fne</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_invoice_tree"/>
+            <field name="arch" type="xml">
+                
+                <!-- Décoration de ligne si la facture est certifiée -->
+                <xpath expr="//tree" position="attributes">
+                    <!-- Note: La syntaxe Odoo 11 utilise 'decoration-success' -->
+                    <attribute name="decoration-success">fne_sent==True</attribute>
+                </xpath>
+                
+                <xpath expr="//tree" position="inside">
+                    <field name="fne_sent" invisible="1"/>
+                    
+                    <!-- Bouton Créer FNE dans la liste (seulement si non envoyé) -->
+                    <button name="action_send_to_fne" 
+                            string="Créer FNE" 
+                            type="object" 
+                            icon="fa-upload" 
+                            attrs="{'invisible': [('fne_sent', '=', True)]}"
+                    />
+                    
+                    <!-- Bouton Voir FNE dans la liste (seulement si envoyé) -->
+                    <button name="action_open_fne_link"
+                            type="object"
+                            string="Voir FNE"
+                            icon="fa-eye"
+                            attrs="{'invisible': [('fne_sent', '!=', True)]}"
+                    />
+                </xpath>
+                
+            </field>
+        </record>
+
+    </data>
+</odoo>

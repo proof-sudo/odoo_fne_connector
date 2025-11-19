@@ -1,0 +1,27 @@
+<odoo>
+    <!-- Action serveur pour bouton en masse -->
+    <record id="action_fne_send_wizard" model="ir.actions.act_window">
+        <field name="name">Envoyer à la DGI</field>
+        <field name="res_model">fne.send.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Bouton dans la liste des factures -->
+    <record id="view_invoice_tree_inherit_fne" model="ir.ui.view">
+        <field name="name">account.move.tree.fne</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_invoice_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="before">
+                <header>
+                    <button name="%(action_fne_send_wizard)d"
+                            string="Envoyer à la DGI"
+                            type="action"
+                            class="btn-primary"
+                            context="{'active_ids': active_ids}"/>
+                </header>
+            </xpath>
+        </field>
+    </record>
+</odoo>
