@@ -65,7 +65,7 @@ class AccountInvoice(models.Model):
     def _compute_custom_taxes(self):
         """Agrège les taxes non TVA (autres prélèvements) au niveau racine."""
         customs = {}
-        for line in self.invoice_line_ids.filtered(lambda l: not l.product_ids):
+        for line in self.invoice_line_ids.filtered(lambda l: not l.product_id):
             for tax in line.tax_ids:
                 tg = (tax.tax_group_id and tax.tax_group_id.name or "").upper()
                 if "TVA" in tg:
@@ -98,7 +98,7 @@ class AccountInvoice(models.Model):
         taxe= ALLOWED_TAXES.get(regime_fiscal)
         _logger.info(f"[FNE] Régime fiscal pour {self.partner_id.name}: {regime_fiscal} -> Taxe: {taxe}")
         items = []
-        for line in self.invoice_line_ids.filtered(lambda l: not l.product_ids): # Ne traiter que les lignes non-product_ids
+        for line in self.invoice_line_ids.filtered(lambda l: not l.product_id): # Ne traiter que les lignes non-product_id
             if self.type == 'out_invoice':
                 _logger.info(f"[FNE] Traitement de la ligne {line.name} (Produit: {line.product_id.name}) pour le type {self.type}")
                 taxes_list = [taxe] if taxe else [] # Ajouter la taxe uniquement si elle est définie
@@ -198,7 +198,7 @@ class AccountInvoice(models.Model):
             try:
                 line_index = items.index(fne_item)
                 # Utiliser l'index pour trouver la ligne Odoo correspondante
-                line = self.invoice_line_ids.filtered(lambda l: not l.product_ids)[line_index]
+                line = self.invoice_line_ids.filtered(lambda l: not l.product_id)[line_index]
                 if fne_item_id:
                     line.fne_item_id = fne_item_id
                 else:
@@ -327,7 +327,7 @@ class AccountInvoice(models.Model):
             for line in origin.invoice_line_ids.filtered(lambda l: not l.product_id and l.fne_item_id)
         }
         
-        for line in refund_move.invoice_line_ids.filtered(lambda l: not l.product_ids):
+        for line in refund_move.invoice_line_ids.filtered(lambda l: not l.product_id):
             qty = abs(line.quantity or 0)
             if qty <= 0:
                 continue
