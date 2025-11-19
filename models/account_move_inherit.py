@@ -24,11 +24,11 @@ def _truncate(s, n):
     s = _clean_str(s) or ""
     return s[:n]
 
-class AccountMoveLine(models.Model):
+class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
     fne_item_id = fields.Char(string="Item ID FNE", copy=False)
 
-class AccountMove(models.Model):
+class AccountInvoice(models.Model):
     _inherit = 'account.invoice' 
 
 
@@ -361,15 +361,17 @@ class AccountMove(models.Model):
     # Hook post-validation
     # -------------------------
     @api.model
-    def action_post(self):
-        res = super().action_post()
+    def action_invoice_open(self):
+        # Appeler la méthode parente pour valider la facture
+        res = super(AccountInvoice, self).action_invoice_open()
         
-        # --- MEILLEURE PRATIQUE : Lecture directe du paramètre ---
+        # Lecture du paramètre
         config = self.env['ir.config_parameter'].sudo()
         # Lire la valeur stockée (qui est une chaîne 'True'/'False') et la comparer
         if config.get_param('fne.auto_send', 'False') == 'True':
-            self.action_send_to_fne()
-        # --------------------------------------------------------
+            # Utiliser la méthode existante pour envoyer à FNE
+            # On vérifie si la facture est bien validée avant l'envoi
+            self.filtered(lambda inv: inv.state == 'open').action_send_to_fne()
         
         return res
     
