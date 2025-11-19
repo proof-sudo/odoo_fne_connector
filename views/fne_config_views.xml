@@ -26,13 +26,27 @@
                 </form>
             </field>
         </record>
+        <record id="fne_config_settings_tree_view" model="ir.ui.view">
+            <field name="name">fne.config.settings.tree</field>
+            <field name="model">fne.config.settings</field>
+            <field name="arch" type="xml">
+                <tree string="Configuration FNE" create="false" delete="false" edit="false">
+                    <field name="fne_mode" string="Mode"/>
+                    <field name="fne_api_key" string="API Key"/>
+                    <field name="fne_test_url" string="URL Test"/>
+                    <field name="fne_prod_url" string="URL Production"/>
+                    <field name="point_de_vente" string="Point de Vente"/>
+                    <field name="fne_auto_send" string="Envoi Auto"/>
+                </tree>
+            </field>
+        </record>
 
 
         <!-- Action -->
         <record id="action_fne_config_settings" model="ir.actions.act_window">
             <field name="name">Configuration FNE</field>
             <field name="res_model">fne.config.settings</field>
-            <field name="view_mode">form</field>
+            <field name="view_mode">form,tree</field>
             <field name="view_id" ref="view_fne_config_settings_form"/>
             <field name="target">current</field>
         </record>
