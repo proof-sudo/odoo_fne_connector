@@ -137,11 +137,11 @@ class AccountMove(models.Model):
 
         
         template = "B2B" if invoice.partner_id.vat else "B2C"
-        mode_de_paiement = invoice.mode_de_paiement or 'mobile-money'
+        mode_paiement = invoice.mode_paiement or 'mobile-money'
 
         return {
             "invoiceType": invoice_type,
-            "paymentMethod":_clean_str(mode_de_paiement or "mobile-money"),
+            "paymentMethod":_clean_str(mode_paiement or "mobile-money"),
             "template": template,
             "isRne": False,
             "rne": "",

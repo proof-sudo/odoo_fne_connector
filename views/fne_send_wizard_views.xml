@@ -9,9 +9,9 @@
 
     <!-- Bouton dans la liste des factures -->
     <record id="view_invoice_tree_inherit_fne" model="ir.ui.view">
-        <field name="name">account.move.tree.fne</field>
-        <field name="model">account.move</field>
-        <field name="inherit_id" ref="account.view_invoice_tree"/>
+        <field name="name">account.invoice.tree.fne</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_tree"/>
         <field name="arch" type="xml">
             <xpath expr="//tree" position="before">
                 <header>

@@ -5,9 +5,9 @@
         <!-- 1. Héritage de la Vue Formulaire (Boutons et Champs Infos) -->
         <!-- ************************************************************ -->
         <record id="view_move_form_inherit_fne_main" model="ir.ui.view">
-            <field name="name">account.move.form.inherit.fne.main</field>
-            <field name="model">account.move</field>
-            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="name">account.invoice.form.inherit.fne.main</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
             <field name="arch" type="xml">
                 
                 <!-- Champs de statut (rendus invisibles mais nécessaires pour les conditions) -->
@@ -65,10 +65,10 @@
         <!-- ************************************************************ -->
         <!-- 2. Héritage de la Vue Liste (Tree View) -->
         <!-- ************************************************************ -->
-        <record id="view_move_tree_inherit_fne" model="ir.ui.view">
-            <field name="name">account.move.tree.inherit.fne</field>
-            <field name="model">account.move</field>
-            <field name="inherit_id" ref="account.view_invoice_tree"/>
+        <record id="view_invoice_tree_inherit_fne" model="ir.ui.view">
+            <field name="name">account.invoice.tree.inherit.fne</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_tree"/>
             <field name="arch" type="xml">
                 
                 <!-- Décoration de ligne si la facture est certifiée -->
