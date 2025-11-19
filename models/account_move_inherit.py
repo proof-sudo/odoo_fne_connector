@@ -99,7 +99,7 @@ class AccountInvoice(models.Model):
         _logger.info(f"[FNE] Régime fiscal pour {self.partner_id.name}: {regime_fiscal} -> Taxe: {taxe}")
         items = []
         for line in self.invoice_line_ids.filtered(lambda l: not l.display_type): # Ne traiter que les lignes non-display_type
-            if self.move_type == 'out_invoice':
+            if self.type == 'out_invoice':
                 taxes_list = [taxe] if taxe else [] # Ajouter la taxe uniquement si elle est définie
                 items.append({
                     "reference": _clean_str(line.product_id.default_code or ""),
@@ -110,7 +110,7 @@ class AccountInvoice(models.Model):
                     "measurementUnit": _clean_str(line.product_uom_id and line.product_uom_id.name or "pcs"),
                     "taxes": taxes_list,
                 })
-            elif self.move_type == 'in_invoice':
+            elif self.type == 'in_invoice':
                 items.append({
                     "reference": _clean_str(line.product_id.default_code or ""),
                     "description": _truncate(line.name or line.product_id.display_name or "Ligne", 255),
@@ -274,27 +274,27 @@ class AccountInvoice(models.Model):
                     _logger.info("[FNE] %s déjà certifiée.", inv.name)
                     continue
 
-                if inv.move_type in ('out_invoice',):
+                if inv.type in ('out_invoice',):
                     payload = inv._prepare_payload_sale()
                     _logger.info("[FNE] SIGN %s payload=%s", inv.name, payload)
                     data = inv._request_fne("POST", endpoint_sign, headers, json_body=payload)
                     inv._apply_sign_success(data)
 
-                elif inv.move_type in ('in_invoice',):
+                elif inv.type in ('in_invoice',):
                     payload = inv._prepare_payload_purchase_agri()
                     _logger.info("[FNE] SIGN (purchase) %s payload=%s", inv.name, payload)
                     data = inv._request_fne("POST", endpoint_sign, headers, json_body=payload)
                     inv._apply_sign_success(data)
 
-                elif inv.move_type in ('out_refund',):
+                elif inv.type in ('out_refund',):
                     inv._post_refund_to_fne(headers, base_url)
 
-                elif inv.move_type in ('in_refund', 'in_receipt'):
-                    _logger.info("[FNE] %s ignorée (type %s). Ce type de document n'est pas géré par l'envoi FNE.", inv.name, inv.move_type)
+                elif inv.type in ('in_refund', 'in_receipt'):
+                    _logger.info("[FNE] %s ignorée (type %s). Ce type de document n'est pas géré par l'envoi FNE.", inv.name, inv.type)
                     continue
 
                 else:
-                    _logger.info("[FNE] %s ignorée (type %s).", inv.name, inv.move_type)
+                    _logger.info("[FNE] %s ignorée (type %s).", inv.name, inv.type)
 
             except UserError as ue:
                 _logger.error("[FNE] Erreur Utilisateur %s : %s", inv.name, ue.name)
