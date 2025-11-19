@@ -130,6 +130,10 @@ class AccountMove(models.Model):
         footer= config.get_param('fne.footer', '<p>Merci pour votre confiance</p>')
         # --------------------------------------------------------
 
+        # --- AJOUT DU LOGGING POUR LE DEBUGAGE (Point de Vente / Footer) ---
+        _logger.info(f"[FNE DEBUG _prepare_base_payload]: Point de Vente = {point_de_vente}")
+        # -------------------------------------------------------------------
+
         if not point_de_vente:
             raise UserError(_("Le point de vente n'est pas configuré pour le FNE."))
 
@@ -239,6 +243,15 @@ class AccountMove(models.Model):
         mode = (config.get_param('fne.mode', 'test') or 'test').lower()
         base_url = (config.get_param('fne.test_url') if mode == 'test' else config.get_param('fne.prod_url')) or ""
         # --------------------------------------------------------
+
+        # --- AJOUT DU LOGGING POUR LE DEBUGAGE (API Key / Mode / URL) ---
+        _logger.info("FNE CONFIG DEBUG START ----------------------------------------------------------------")
+        _logger.info(f"FNE PARAMETER: mode = {mode}")
+        _logger.info(f"FNE PARAMETER: api_key (masked) = {api_key and '*******' or 'EMPTY'}")
+        _logger.info(f"FNE PARAMETER: fne.test_url = {config.get_param('fne.test_url')}")
+        _logger.info(f"FNE PARAMETER: fne.prod_url = {config.get_param('fne.prod_url')}")
+        _logger.info(f"FNE PARAMETER: base_url FINAL = {base_url}")
+        _logger.info("FNE CONFIG DEBUG END ------------------------------------------------------------------")
 
         if not base_url:
             raise UserError(_("L'URL de l'API FNE n'est pas configurée."))
