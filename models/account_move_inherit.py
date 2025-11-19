@@ -171,7 +171,7 @@ class AccountInvoice(models.Model):
             "pointOfSale": point_de_vente,
             "establishment": "NEURONES TECHNOLOGIE",
             # "establishment": _clean_str(invoice.company_id.name or ""),
-            "commercialMessage":_truncate("Condition de paiement : " + (getattr(self.invoice_payment_term_id, "name", "") or ""),140),
+            "commercialMessage":_truncate("Condition de paiement : " + (getattr(self.payment_term_id, "name", "") or ""),140),
             "footer": _clean_str(footer),
             "foreignCurrency": "",
             "foreignCurrencyRate": 0,
