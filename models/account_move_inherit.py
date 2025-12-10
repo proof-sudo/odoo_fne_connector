@@ -48,7 +48,7 @@ class AccountInvoice(models.Model):
             ('card', 'Carte Bancaire'),],
         string="Methode de paiement",
         default='cheque',
-        help="Sélectionnez le mode de paiement pour la facture.",
+        help="Sélectionnez le mode de paiement pour la facture."
     )
     
     # Reste de vos fonctions utilitaires inchangées
