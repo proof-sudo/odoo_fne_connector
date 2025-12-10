@@ -5,8 +5,8 @@
     'summary': 'Connecteur FNE - Déversement des factures vers la DGI',
     'author': 'Neurones Technologies',
     'license': 'AGPL-3',
-    # 'category': 'Accounting',
-    'depends': [ 'base'],
+    'category': 'Accounting',
+    'depends': [ 'account','base'],
     'data': [
         'security/ir.model.access.csv',
         'views/fne_actions.xml',
