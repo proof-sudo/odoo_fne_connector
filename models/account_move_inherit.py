@@ -156,7 +156,18 @@ class AccountInvoice(models.Model):
 
         
         template = "B2B" if invoice.partner_id.vat else "B2C"
-        mode_paiement = invoice.modes_paiement or 'check'
+        if self.modes_paiement == 'mobile_money':
+            mode_paiement = 'mobile_money'
+        elif self.modes_paiement =='espece':
+            mode_paiement='espece'
+        elif self.modes_paiement =="virement":
+            mode_paiement='virement'
+        elif self.modes_paiement =="cheque":
+            mode_paiement='check'
+        elif self.modes_paiement =="deferred":
+            mode_paiement='deferred'
+        else :
+            mode_paiement ="card"
 
         return {
             "invoiceType": invoice_type,
