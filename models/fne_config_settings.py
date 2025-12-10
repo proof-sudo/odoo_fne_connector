@@ -13,7 +13,7 @@ class FneConfigSettings(models.TransientModel):
     ], string="Mode", default='test')
     fne_auto_send = fields.Boolean(string="Envoi automatique après validation", default=False)
     fne_test_url = fields.Char(string="URL Test", default="http://54.247.95.108/ws")
-    fne_prod_url = fields.Char(string="URL Production", default="https://prod.fne.ci/api")
+    fne_prod_url = fields.Char(string="URL Production", default="https://www.services.fne.dgi.gouv.ci/ws")
     point_de_vente= fields.Char(string="Point de Vente", help="Identifiant du point de vente pour le FNE")
     footer = fields.Html(string="FNE Footer", default="<p> Merci pour votre confiance</p>")
 
