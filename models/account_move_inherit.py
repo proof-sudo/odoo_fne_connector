@@ -61,6 +61,36 @@ class AccountInvoice(models.Model):
         if partner.vat:
             return "B2B"
         return "B2C"
+    @api.multi # CHANGEMENT RECOMMANDÉ : api.multi est plus approprié pour les actions de bouton
+    def action_invoice_open(self):
+        
+        # --- DEBUT DEBOGAGE ---
+        _logger.info("--- DEBUT INSPECTION CONTEXTE ---")
+        
+        # Le contexte de l'environnement (env.context) est l'objet à auditer
+        current_context = self.env.context
+        
+        # Vérification 1: Le contexte est-il une séquence (liste/tuple) au lieu d'un dictionnaire ?
+        if not isinstance(current_context, dict):
+            _logger.error(f"FATAL ERROR: Le contexte global n'est pas un dictionnaire. Type trouvé: {current_context.__class__.__name__}")
+        else:
+            # Vérification 2: Y a-t-il une clé dans le dictionnaire qui a un objet Python complexe qui pourrait être mal sérialisé ?
+            for key, value in current_context.items():
+                if not isinstance(value, (str, int, float, bool, dict, list, tuple, type(None))):
+                     _logger.error(f"CONTEXT PROBLEM: Clé '{key}' a une valeur de type {value.__class__.__name__}. Valeur partielle: {str(value)[:50]}")
+        
+        _logger.info("--- FIN INSPECTION CONTEXTE ---")
+        # --- FIN DEBOGAGE ---
+        
+        # L'ERREUR DE TYPE SE PRODUIT LORS DE L'APPEL AU SUPER
+        res = super(AccountInvoice, self).action_invoice_open() 
+        
+        # ... (votre logique FNE) ...
+        config = self.env['ir.config_parameter'].sudo()
+        if config.get_param('fne.auto_send', 'False') == 'True':
+            self.filtered(lambda inv: inv.state == 'open').action_send_to_fne()
+        
+        return res
 
     def _compute_custom_taxes(self):
         """Agrège les taxes non TVA (autres prélèvements) au niveau racine."""
