@@ -38,7 +38,7 @@ class AccountInvoice(models.Model):
     invoice_id_from_fne = fields.Char(string="ID FNE", readonly=True, copy=False)
     fne_warning = fields.Boolean(string="Avertissement FNE", readonly=True, copy=False)
     fne_balance_sticker = fields.Integer(string="Solde sticker FNE", readonly=True, copy=False)
-    modes_paiement = fields.Selection(
+    mode_payment = fields.Selection(
         selection=[
             ('mobile_money', 'Mobile Money'),
             ('espece', 'Espèces'),
