@@ -137,7 +137,7 @@ class AccountInvoice(models.Model):
         
         # --- MEILLEURE PRATIQUE : Lecture directe du paramètre ---
         config = self.env['ir.config_parameter'].sudo()
-        point_de_vente = "neurones 2"
+        point_de_vente = "SIEGE NEURONES"
         # point_de_vente = config.get_param('fne.point_de_vente', 'Default Point of Sale')
         footer= config.get_param('fne.footer', '<p>Merci pour votre confiance</p>')
         # --------------------------------------------------------
@@ -181,7 +181,7 @@ class AccountInvoice(models.Model):
             "clientEmail": _clean_str(invoice.partner_id.email or ""),
             "clientSellerName": _clean_str(invoice.user_id.name or ""),
             "pointOfSale": point_de_vente,
-            "establishment": "NEURONES TECHNOLOGIE",
+            "establishment": "NEURONES TECHNOLOGIES SA",
             # "establishment": _clean_str(invoice.company_id.name or ""),
             "commercialMessage":_truncate("Condition de paiement : " + (getattr(self.payment_term_id, "name", "") or ""),140),
             "footer": _clean_str(footer),
@@ -262,10 +262,10 @@ class AccountInvoice(models.Model):
         
         # --- MEILLEURE PRATIQUE : Lecture directe du paramètre ---
         config = self.env['ir.config_parameter'].sudo()
-        # api_key = config.get_param('fne.api_key') or "Nblg5BBvdRb02ksRTL6Ej2ZMUD7N8YLb"
-        api_key ="Nblg5BBvdRb02ksRTL6Ej2ZMUD7N8YLb"
+        # api_key = config.get_param('fne.api_key') or "6kXovg6Cb2wxWv39d8wDPrHto5nzAh2Z"
+        api_key ="6kXovg6Cb2wxWv39d8wDPrHto5nzAh2Z"
         mode = (config.get_param('fne.mode', 'test') or 'test').lower()
-        base_url =  "http://54.247.95.108/ws"
+        base_url =  "https://www.services.fne.dgi.gouv.ci/ws"
         # base_url = (config.get_param('fne.test_url' or "http://54.247.95.108/ws") if mode == 'test' else config.get_param('fne.prod_url')) or ""
         # --------------------------------------------------------
 
