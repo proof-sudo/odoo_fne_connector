@@ -46,7 +46,7 @@ class AccountInvoice(models.Model):
             ('cheque', 'Chèque'),
             ('deferred', 'A terme'),
             ('card', 'Carte Bancaire'),],
-        string="Mode de paiement",
+        string="Methode de paiement",
         default='cheque',
         help="Sélectionnez le mode de paiement pour la facture.",
     )
