@@ -45,7 +45,7 @@
                     />
 
                 </header>
-                <xpath expr="//field[@name='mode_paiement']" position="after">
+                <xpath expr="//field[@name='mode_payment']" position="after">
                     <field name="modes_paiement"/>
                 </xpath>
                 
