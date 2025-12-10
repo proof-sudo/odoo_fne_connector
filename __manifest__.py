@@ -6,7 +6,7 @@
     'author': 'Neurones Technologies',
     'license': 'AGPL-3',
     'category': 'Accounting',
-    'depends': ['account', 'base'],
+    'depends': [ 'base'],
     'data': [
         'security/ir.model.access.csv',
         'views/fne_actions.xml',
