@@ -183,11 +183,11 @@ class AccountInvoice(models.Model):
         
         template = "B2B" if invoice.partner_id.vat else "B2C"
         if self.modes_paiement == 'mobile_money':
-            mode_paiement = 'mobile_money'
+            mode_paiement = 'mobile-money'
         elif self.modes_paiement =='espece':
-            mode_paiement='espece'
+            mode_paiement='cash'
         elif self.modes_paiement =="virement":
-            mode_paiement='virement'
+            mode_paiement='transfer'
         elif self.modes_paiement =="cheque":
             mode_paiement='check'
         elif self.modes_paiement =="deferred":
@@ -210,7 +210,7 @@ class AccountInvoice(models.Model):
             "establishment": establishment,
             # "establishment": _clean_str(invoice.company_id.name or ""),
             "commercialMessage":_truncate("Condition de paiement : " + (getattr(self.payment_term_id, "name", "") or ""),140),
-            "footer": footer,
+            "footer": _clean_str(footer),
             "foreignCurrency": "",
             "foreignCurrencyRate": 0,
             "items": items,
