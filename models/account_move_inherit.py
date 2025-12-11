@@ -152,7 +152,7 @@ class AccountInvoice(models.Model):
         
         # --- MEILLEURE PRATIQUE : Lecture directe du paramètre ---
         config = self.env['ir.config_parameter'].sudo()
-        point_de_vente = "SIEGE NEURONES"
+        point_de_vente = config.get_param('fne.point_de_vente', 'SIEGE NEURONES')
         # point_de_vente = config.get_param('fne.point_de_vente', 'Default Point of Sale')
         footer= config.get_param('fne.footer', '<p>Merci pour votre confiance</p>')
         # --------------------------------------------------------
