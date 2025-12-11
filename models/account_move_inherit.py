@@ -210,7 +210,7 @@ class AccountInvoice(models.Model):
             "establishment": establishment,
             # "establishment": _clean_str(invoice.company_id.name or ""),
             "commercialMessage":_truncate("Condition de paiement : " + (getattr(self.payment_term_id, "name", "") or ""),140),
-            "footer": _clean_str(footer),
+            "footer":"Merci pour votre confiance",
             "foreignCurrency": "",
             "foreignCurrencyRate": 0,
             "items": items,
