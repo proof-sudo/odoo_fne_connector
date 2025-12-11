@@ -1,7 +1,7 @@
 <odoo>
     <data>
-        <record id="view_fne_config_settings_form" model="ir.ui.view">
-            <field name="name">fne.config.settings.form</field>
+        <record id="view_fne_config_settings_forms" model="ir.ui.view">
+            <field name="name">fne.config.settings.forms</field>
             <field name="model">fne.config.settings</field>
             <field name="arch" type="xml">
                 <form string="Configuration FNE">
@@ -25,8 +25,8 @@
                 </form>
             </field>
         </record>
-        <record id="fne_config_settings_tree_view" model="ir.ui.view">
-            <field name="name">fne.config.settings.tree</field>
+        <record id="fne_config_settings_tree_views" model="ir.ui.view">
+            <field name="name">fne.config.settings.trees</field>
             <field name="model">fne.config.settings</field>
             <field name="arch" type="xml">
                 <tree string="Configuration FNE" create="false"  edit="false">
@@ -41,7 +41,7 @@
         </record>
 
 
-        <record id="action_fne_config_settingss" model="ir.actions.act_window">
+        <record id="action_fne_config_settings" model="ir.actions.act_window">
             <field name="name">Configuration FNE</field>
             <field name="res_model">fne.config.settings</field>
             <field name="view_mode">tree,form</field>
@@ -56,7 +56,7 @@
         <menuitem id="menu_fne_config_settings"
                   name="Paramètres FNE"
                   parent="menu_fne_config_root"
-                  action="action_fne_config_settingss" 
+                  action="action_fne_config_settings" 
                   sequence="10"/>
     </data>
 </odoo>
