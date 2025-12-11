@@ -132,11 +132,26 @@
                                 <div class="o_setting_right_pane">
                                     <label for="fne_point_de_vente" string="Point de Vente"/>
                                     <div class="text-muted">
-                                        Identifiant de votre établissement (obligatoire)
+                                        Identifiant du point de vente (obligatoire)
                                     </div>
                                     <div class="content-group">
                                         <div class="mt16">
                                             <field name="fne_point_de_vente" placeholder="Ex: SIEGE NEURONES" class="o_input" required="1"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane"/>
+                                <div class="o_setting_right_pane">
+                                    <label for="fne_establishment" string="Établissement"/>
+                                    <div class="text-muted">
+                                        Nom complet de votre entreprise
+                                    </div>
+                                    <div class="content-group">
+                                        <div class="mt16">
+                                            <field name="fne_establishment" placeholder="Ex: NEURONES TECHNOLOGIES SA" class="o_input"/>
                                         </div>
                                     </div>
                                 </div>
