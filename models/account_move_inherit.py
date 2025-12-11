@@ -1,4 +1,5 @@
 import logging
+from logging import config
 import requests
 from odoo import models, api, fields, _
 from odoo.exceptions import UserError
@@ -152,11 +153,18 @@ class AccountInvoice(models.Model):
         
         # --- MEILLEURE PRATIQUE : Lecture directe du paramètre ---
         config = self.env['ir.config_parameter'].sudo()
-        point_de_vente = config.get_param('fne.point_de_vente', 'SIEGE NEURONES')
+        point_de_vente = config.get_param('fne.point_de_vente', default='').strip()
         # point_de_vente = config.get_param('fne.point_de_vente', 'Default Point of Sale')
-        footer= config.get_param('fne.footer', '<p>Merci pour votre confiance</p>')
+        footer = config.get_param('fne.footer', default='<p>Merci pour votre confiance</p>').strip()
         # --------------------------------------------------------
-
+        if not point_de_vente:
+            raise UserError(_(
+            "Le point de vente n'est pas configuré pour le FNE.\n\n"
+            "Veuillez le renseigner dans:\n"
+            "Configuration > Paramètres > Section FNE > Point de Vente"
+        ))
+        _logger.info(f"[FNE] Point de vente utilisé: {point_de_vente}")
+        _logger.info(f"[FNE] Footer: {footer[:50]}..." if len(footer) > 50 else f"[FNE] Footer: {footer}")
         # --- AJOUT DU LOGGING POUR LE DEBUGAGE (Point de Vente / Footer) ---
         _logger.info(f"[FNE DEBUG _prepare_base_payload]: Point de Vente = {point_de_vente}")
         # -------------------------------------------------------------------
@@ -277,29 +285,36 @@ class AccountInvoice(models.Model):
         
         # --- MEILLEURE PRATIQUE : Lecture directe du paramètre ---
         config = self.env['ir.config_parameter'].sudo()
-        api_key = config.get_param('fne.api_key') or ""
+        api_key = config.get_param('fne.api_key', default='').strip()
         # api_key ="6kXovg6Cb2zwxWv39dc8wDPrHto5nzAh2Zdvdssss"
-        mode = (config.get_param('fne.mode', 'test') or 'test').lower()
-        # base_url =  "https://www.services.fne.dgi.gouv.ci/ws"
-        if mode == 'test':  
-            base_url = config.get_param('fne.test_url', 'http://54.247.95.108/ws')
-        else:
-            base_url = config.get_param('fne.prod_url', 'https://www.services.fne.dgi.gouv.ci/ws')
-            # --------------------------------------------------------
-
-        # --- AJOUT DU LOGGING POUR LE DEBUGAGE (API Key / Mode / URL) ---
-        _logger.info("FNE CONFIG DEBUG START ----------------------------------------------------------------")
-        _logger.info(f"FNE PARAMETER: mode = {mode}")
-        _logger.info(f"FNE PARAMETER: api_key (masked) = {api_key and '*******' or 'EMPTY'}")
-        _logger.info(f"FNE PARAMETER: fne.test_url = {config.get_param('fne.test_url')}")
-        _logger.info(f"FNE PARAMETER: fne.prod_url = {config.get_param('fne.prod_url')}")
-        _logger.info(f"FNE PARAMETER: base_url FINAL = {base_url}")
-        _logger.info("FNE CONFIG DEBUG END ------------------------------------------------------------------")
-
-        if not base_url:
-            raise UserError(_("L'URL de l'API FNE n'est pas configurée."))
+        mode = (config.get_param('fne.mode', default='test') or 'test').lower().strip()
         if not api_key:
-            raise UserError(_("La clé API FNE n'est pas configurée."))
+            raise UserError(_(
+                "La clé API FNE n'est pas configurée.\n\n"
+                "Veuillez configurer le module FNE dans:\n"
+                "Configuration > Paramètres > Section FNE"
+            ))
+        # base_url =  "https://www.services.fne.dgi.gouv.ci/ws"
+        if mode == 'prod':
+            base_url = config.get_param('fne.prod_url', default='https://www.services.fne.dgi.gouv.ci/ws')
+        else:
+            base_url = config.get_param('fne.test_url', default='http://54.247.95.108/ws')
+            # --------------------------------------------------------
+        if not base_url or not base_url.strip():
+            raise UserError(_(
+            "L'URL de l'API FNE n'est pas configurée pour le mode '%s'.\n\n"
+            "Veuillez configurer le module FNE dans:\n"
+            "Configuration > Paramètres > Section FNE"
+        ) % mode)
+    
+        base_url = base_url.strip()
+        # --- AJOUT DU LOGGING POUR LE DEBUGAGE (API Key / Mode / URL) ---
+        _logger.info("=" * 70)
+        _logger.info("[FNE] Configuration chargée:")
+        _logger.info(f"  - Mode: {mode}")
+        _logger.info(f"  - API Key: {'*' * (len(api_key) - 4) + api_key[-4:] if len(api_key) > 4 else '***'}")
+        _logger.info(f"  - Base URL: {base_url}")
+        _logger.info("=" * 70)
 
         headers = {
             'Authorization': f"Bearer {api_key}",
