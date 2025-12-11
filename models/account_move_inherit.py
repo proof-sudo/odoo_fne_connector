@@ -277,11 +277,11 @@ class AccountInvoice(models.Model):
         
         # --- MEILLEURE PRATIQUE : Lecture directe du paramètre ---
         config = self.env['ir.config_parameter'].sudo()
-        # api_key = config.get_param('fne.api_key') or "6kXovg6Cb2wxWv39d8wDPrHto5nzAh2Z"
-        api_key ="6kXovg6Cb2wxWv39d8wDPrHto5nzAh2Zdvdssss"
+        api_key = config.get_param('fne.api_key') or ""
+        # api_key ="6kXovg6Cb2zwxWv39dc8wDPrHto5nzAh2Zdvdssss"
         mode = (config.get_param('fne.mode', 'test') or 'test').lower()
-        base_url =  "https://www.services.fne.dgi.gouv.ci/ws"
-        # base_url = (config.get_param('fne.test_url' or "http://54.247.95.108/ws") if mode == 'test' else config.get_param('fne.prod_url')) or ""
+        # base_url =  "https://www.services.fne.dgi.gouv.ci/ws"
+        base_url = (config.get_param('fne.test_url' or "http://54.247.95.108/ws") if mode == 'test' else config.get_param('fne.prod_url')) or "https://www.services.fne.dgi.gouv.ci/ws"
         # --------------------------------------------------------
 
         # --- AJOUT DU LOGGING POUR LE DEBUGAGE (API Key / Mode / URL) ---
