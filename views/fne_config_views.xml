@@ -1,140 +1,261 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Vue de configuration FNE dans les paramètres généraux -->
-    <record id="view_fne_config_settings" model="ir.ui.view">
-        <field name="name">fne.config.settings.form</field>
-        <field name="model">res.config.settings</field>
-        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
-        <field name="arch" type="xml">
-            <xpath expr="//div[hasclass('settings')]" position="inside">
-                <div class="app_settings_block" data-string="FNE - Facturation Électronique" 
-                     string="FNE - Facturation Électronique" data-key="fne_config">
-                    
-                    <h2>Configuration de la Facturation Électronique Normée (FNE)</h2>
-                    
-                    <!-- Connexion API -->
-                    <div class="row mt16 o_settings_container">
-                        <div class="col-12 col-lg-6 o_setting_box">
-                            <div class="o_setting_left_pane">
-                                <field name="fne_mode" widget="radio" required="1"/>
-                            </div>
-                            <div class="o_setting_right_pane">
-                                <label string="Environnement d'exécution" for="fne_mode"/>
-                                <div class="text-muted">
-                                    Sélectionnez Test pour les tests ou Production pour l'environnement réel
-                                </div>
-                            </div>
+    <data>
+        <!-- ========================================== -->
+        <!-- Vue Formulaire - Configuration FNE         -->
+        <!-- ========================================== -->
+        <record id="view_fne_config_settings_form" model="ir.ui.view">
+            <field name="name">fne.config.settings.form</field>
+            <field name="model">fne.config.settings</field>
+            <field name="arch" type="xml">
+                <form string="Configuration FNE" >
+                    <header>
+                        <button name="set_values" 
+                                string="Enregistrer" 
+                                type="object" 
+                                class="oe_highlight"
+                                groups="base.group_system"/>
+                        <button string="Annuler" 
+                                class="btn-secondary" 
+                                special="cancel"/>
+                    </header>
+                    <sheet>
+                        <!-- Titre et description -->
+                        <div class="oe_title">
+                            <label for="fne_mode" class="oe_edit_only"/>
+                            <h1>
+                                <field name="fne_mode" widget="radio" options="{'horizontal': true}"/>
+                            </h1>
                         </div>
                         
-                        <div class="col-12 col-lg-6 o_setting_box">
-                            <div class="o_setting_left_pane"/>
-                            <div class="o_setting_right_pane">
-                                <label string="Clé API FNE" for="fne_api_key"/>
-                                <div class="text-muted">
-                                    Clé d'authentification fournie par la DGI
-                                </div>
-                                <div class="content-group">
-                                    <div class="mt16">
-                                        <field name="fne_api_key" password="True" placeholder="Votre clé API..."/>
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- Bandeau d'information selon le mode -->
+                        <div class="alert alert-warning" role="alert" attrs="{'invisible': [('fne_mode', '!=', 'test')]}">
+                            <strong>⚠️ Mode Test activé</strong>
+                            <p class="mb-0">Vous êtes en environnement de test. Les factures ne seront pas envoyées à la DGI de production.</p>
                         </div>
-                    </div>
+                        <div class="alert alert-danger" role="alert" attrs="{'invisible': [('fne_mode', '!=', 'prod')]}">
+                            <strong>🔴 Mode Production activé</strong>
+                            <p class="mb-0">Attention : Les factures seront envoyées directement à la DGI en environnement réel.</p>
+                        </div>
 
-                    <!-- URLs API -->
-                    <div class="row mt16 o_settings_container">
-                        <div class="col-12 col-lg-6 o_setting_box">
-                            <div class="o_setting_left_pane"/>
-                            <div class="o_setting_right_pane">
-                                <label string="URL Test" for="fne_test_url"/>
-                                <div class="text-muted">
-                                    URL de l'API FNE en environnement de test
-                                </div>
-                                <div class="content-group">
-                                    <div class="mt16">
-                                        <field name="fne_test_url" placeholder="http://54.247.95.108/ws"/>
+                        <notebook>
+                            <!-- Onglet 1: Connexion API -->
+                            <page string="🔐 Connexion API" name="api_connection">
+                                <group>
+                                    <group string="Authentification">
+                                        <field name="fne_api_key" 
+                                               password="True" 
+                                               placeholder="Entrez votre clé API FNE..."
+                                               required="1"/>
+                                        <field name="fne_auto_send"/>
+                                    </group>
+                                    <group string="URLs des services">
+                                        <field name="fne_test_url" 
+                                               placeholder="http://54.247.95.108/ws"
+                                               attrs="{'required': [('fne_mode', '=', 'test')]}"/>
+                                        <field name="fne_prod_url" 
+                                               placeholder="https://www.services.fne.dgi.gouv.ci/ws"
+                                               attrs="{'required': [('fne_mode', '=', 'prod')]}"/>
+                                    </group>
+                                </group>
+                                
+                                <!-- Section informative -->
+                                <group string="ℹ️ Informations">
+                                    <div class="alert alert-info" role="alert">
+                                        <p><strong>Comment obtenir votre clé API ?</strong></p>
+                                        <ol class="mb-0">
+                                            <li>Contactez la Direction Générale des Impôts (DGI)</li>
+                                            <li>Demandez l'inscription au service FNE</li>
+                                            <li>Recevez vos identifiants pour Test et Production</li>
+                                        </ol>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-12 col-lg-6 o_setting_box">
-                            <div class="o_setting_left_pane"/>
-                            <div class="o_setting_right_pane">
-                                <label string="URL Production" for="fne_prod_url"/>
-                                <div class="text-muted">
-                                    URL de l'API FNE en environnement de production
-                                </div>
-                                <div class="content-group">
-                                    <div class="mt16">
-                                        <field name="fne_prod_url" placeholder="https://www.services.fne.dgi.gouv.ci/ws"/>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                </group>
+                            </page>
 
-                    <!-- Configuration métier -->
-                    <div class="row mt16 o_settings_container">
-                        <div class="col-12 col-lg-6 o_setting_box">
-                            <div class="o_setting_left_pane"/>
-                            <div class="o_setting_right_pane">
-                                <label string="Point de Vente" for="fne_point_de_vente"/>
-                                <div class="text-muted">
-                                    Identifiant du point de vente (ex: SIEGE NEURONES)
-                                </div>
-                                <div class="content-group">
-                                    <div class="mt16">
-                                        <field name="fne_point_de_vente" placeholder="SIEGE NEURONES" required="1"/>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-12 col-lg-6 o_setting_box">
-                            <div class="o_setting_left_pane">
-                                <field name="fne_auto_send"/>
-                            </div>
-                            <div class="o_setting_right_pane">
-                                <label for="fne_auto_send"/>
-                                <div class="text-muted">
-                                    Si activé, les factures seront automatiquement envoyées à la DGI après validation
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                            <!-- Onglet 2: Configuration Métier -->
+                            <page string="🏢 Configuration Métier" name="business_config">
+                                <group>
+                                    <group string="Informations de l'établissement">
+                                        <field name="point_de_vente" 
+                                               placeholder="Ex: SIEGE NEURONES, ABIDJAN PLATEAU..."
+                                               required="1"/>
+                                    </group>
+                                    <group string="Paramètres d'envoi">
+                                        <label for="fne_auto_send" string="Envoi automatique"/>
+                                        <div>
+                                            <field name="fne_auto_send" class="oe_inline"/>
+                                            <span class="text-muted ml-2">
+                                                Les factures seront certifiées automatiquement après validation
+                                            </span>
+                                        </div>
+                                    </group>
+                                </group>
 
-                    <!-- Footer -->
-                    <div class="row mt16 o_settings_container">
-                        <div class="col-12 o_setting_box">
-                            <div class="o_setting_left_pane"/>
-                            <div class="o_setting_right_pane">
-                                <label string="Pied de page FNE" for="fne_footer"/>
-                                <div class="text-muted">
-                                    Message affiché en bas des factures certifiées (HTML autorisé)
-                                </div>
-                                <div class="content-group">
-                                    <div class="mt16">
-                                        <field name="fne_footer" widget="html"/>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                <separator string="Pied de page des factures"/>
+                                <group>
+                                    <field name="footer" 
+                                           widget="html" 
+                                           placeholder="&lt;p&gt;Message personnalisé affiché sur vos factures certifiées&lt;/p&gt;"
+                                           options="{'style-inline': true, 'height': 200}"/>
+                                </group>
+                            </page>
 
-                </div>
-            </xpath>
-        </field>
-    </record>
+                            <!-- Onglet 3: Test de connexion -->
+                            <page string="🔧 Diagnostics" name="diagnostics">
+                                <group>
+                                    <group string="État de la configuration">
+                                        <field name="fne_api_key" 
+                                               readonly="1" 
+                                               password="True" 
+                                               string="Clé API configurée"/>
+                                        <field name="point_de_vente" 
+                                               readonly="1" 
+                                               string="Point de vente configuré"/>
+                                    </group>
+                                    <group string="URL active">
+                                        <label for="fne_test_url" 
+                                               string="URL utilisée"
+                                               attrs="{'invisible': [('fne_mode', '!=', 'test')]}"/>
+                                        <field name="fne_test_url" 
+                                               readonly="1"
+                                               attrs="{'invisible': [('fne_mode', '!=', 'test')]}"/>
+                                        
+                                        <label for="fne_prod_url" 
+                                               string="URL utilisée"
+                                               attrs="{'invisible': [('fne_mode', '!=', 'prod')]}"/>
+                                        <field name="fne_prod_url" 
+                                               readonly="1"
+                                               attrs="{'invisible': [('fne_mode', '!=', 'prod')]}"/>
+                                    </group>
+                                </group>
 
-    <!-- Menu d'accès (optionnel, les paramètres sont déjà dans Configuration > Paramètres) -->
-    <menuitem 
-        id="menu_fne_config" 
-        name="FNE Configuration"
-        parent="base.menu_administration"
-        action="base.action_general_configuration"
-        sequence="100"
-        groups="base.group_system"/>
-        
+                                <separator string="Vérifications"/>
+                                <div class="alert alert-success" role="alert" 
+                                     attrs="{'invisible': ['|', ('fne_api_key', '=', False), ('point_de_vente', '=', False)]}">
+                                    <p class="mb-0">
+                                        <strong>✓ Configuration complète</strong><br/>
+                                        Votre module FNE est prêt à être utilisé.
+                                    </p>
+                                </div>
+                                <div class="alert alert-warning" role="alert" 
+                                     attrs="{'invisible': [('fne_api_key', '!=', False), ('point_de_vente', '!=', False)]}">
+                                    <p class="mb-0">
+                                        <strong>⚠️ Configuration incomplète</strong><br/>
+                                        Veuillez renseigner tous les champs obligatoires.
+                                    </p>
+                                </div>
+                            </page>
+
+                            <!-- Onglet 4: Aide -->
+                            <page string="❓ Aide" name="help">
+                                <group>
+                                    <group string="Documentation">
+                                        <div class="alert alert-info" role="alert">
+                                            <h4>📚 Guide de configuration</h4>
+                                            <p><strong>1. Mode Test</strong></p>
+                                            <ul>
+                                                <li>Utilisez ce mode pour vos tests et développements</li>
+                                                <li>Les factures sont envoyées à un environnement de test</li>
+                                                <li>Aucun impact sur vos déclarations fiscales réelles</li>
+                                            </ul>
+                                            
+                                            <p><strong>2. Mode Production</strong></p>
+                                            <ul>
+                                                <li>À utiliser uniquement après validation complète en test</li>
+                                                <li>Les factures sont envoyées à la DGI officielle</li>
+                                                <li>Impact direct sur vos obligations fiscales</li>
+                                            </ul>
+
+                                            <p><strong>3. Envoi automatique</strong></p>
+                                            <ul>
+                                                <li><strong>Activé :</strong> Les factures sont certifiées automatiquement après validation</li>
+                                                <li><strong>Désactivé :</strong> Vous devez certifier manuellement via le bouton "Certifier FNE"</li>
+                                            </ul>
+
+                                            <p><strong>4. Point de vente</strong></p>
+                                            <ul>
+                                                <li>Identifiant unique de votre établissement</li>
+                                                <li>Fourni par la DGI lors de votre inscription</li>
+                                                <li>Exemples : "SIEGE SOCIAL", "ABIDJAN PLATEAU", "BOUAKE CENTRE"</li>
+                                            </ul>
+                                        </div>
+                                    </group>
+
+                                    <group string="Support">
+                                        <div class="alert alert-warning" role="alert">
+                                            <h4>🆘 Besoin d'aide ?</h4>
+                                            <p><strong>Support DGI :</strong></p>
+                                            <ul class="mb-0">
+                                                <li>Email : support@dgi.gouv.ci</li>
+                                                <li>Téléphone : +225 XX XX XX XX XX</li>
+                                                <li>Site web : <a href="https://www.dgi.gouv.ci" target="_blank">www.dgi.gouv.ci</a></li>
+                                            </ul>
+                                        </div>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- Vue Liste - Configuration FNE              -->
+        <!-- ========================================== -->
+        <record id="fne_config_settings_tree_view" model="ir.ui.view">
+            <field name="name">fne.config.settings.tree</field>
+            <field name="model">fne.config.settings</field>
+            <field name="arch" type="xml">
+                <tree string="Configuration FNE" >
+                    <field name="fne_mode" string="Mode" widget="badge" 
+                           decoration-success="fne_mode == 'test'"
+                           decoration-danger="fne_mode == 'prod'"/>
+                    <field name="point_de_vente" string="Point de Vente"/>
+                    <field name="fne_api_key" string="Clé API" password="True"/>
+                    <field name="fne_test_url" string="URL Test"/>
+                    <field name="fne_prod_url" string="URL Production"/>
+                    <field name="fne_auto_send" string="Envoi Auto" widget="boolean_toggle"/>
+                    <field name="write_date" string="Dernière modification"/>
+                    <field name="write_uid" string="Modifié par"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- Action                                     -->
+        <!-- ========================================== -->
+        <record id="action_fne_config_settingss" model="ir.actions.act_window">
+            <field name="name">Configuration FNE</field>
+            <field name="res_model">fne.config.settings</field>
+            <field name="view_mode">form,tree</field>
+            <field name="view_id" ref="view_fne_config_settings_form"/>
+            <field name="target">current</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Configuration du module FNE
+                </p>
+                <p>
+                    Configurez les paramètres de connexion à la DGI pour la certification électronique des factures.
+                </p>
+            </field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- Menu                                       -->
+        <!-- ========================================== -->
+        <menuitem id="menu_fne_config_root"
+                  name="FNE"
+                  parent="base.menu_administration"
+                  sequence="50"
+                  groups="base.group_system"/>
+
+        <menuitem id="menu_fne_config_settings"
+                  name="Paramètres FNE"
+                  parent="menu_fne_config_root"
+                  action="action_fne_config_settingss" 
+                  sequence="10"
+                  groups="base.group_system"/>
+
+    </data>
 </odoo>
