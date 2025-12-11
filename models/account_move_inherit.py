@@ -62,20 +62,20 @@ class AccountInvoice(models.Model):
             return "B2B"
         return "B2C"
     
-    @api.multi
-    def action_invoice_open(self):
-        # Appeler la méthode parente pour valider la facture (C'est là que l'erreur se produit si le contexte est corrompu)
-        res = super(AccountInvoice, self).action_invoice_open()
+    # @api.multi
+    # def action_invoice_open(self):
+    #     # Appeler la méthode parente pour valider la facture (C'est là que l'erreur se produit si le contexte est corrompu)
+    #     res = super(AccountInvoice, self).action_invoice_open()
         
-        # Lecture du paramètre
-        config = self.env['ir.config_parameter'].sudo()
-        # Lire la valeur stockée (qui est une chaîne 'True'/'False') et la comparer
-        if config.get_param('fne.auto_send', 'False') == 'True':
-            # Utiliser la méthode existante pour envoyer à FNE
-            # On vérifie si la facture est bien validée avant l'envoi
-            self.filtered(lambda inv: inv.state == 'open').action_send_to_fne()
+    #     # Lecture du paramètre
+    #     config = self.env['ir.config_parameter'].sudo()
+    #     # Lire la valeur stockée (qui est une chaîne 'True'/'False') et la comparer
+    #     if config.get_param('fne.auto_send', 'False') == 'True':
+    #         # Utiliser la méthode existante pour envoyer à FNE
+    #         # On vérifie si la facture est bien validée avant l'envoi
+    #         self.filtered(lambda inv: inv.state == 'open').action_send_to_fne()
         
-        return res
+    #     return res
    
     def _compute_custom_taxes(self):
         """Agrège les taxes non TVA (autres prélèvements) au niveau racine."""
@@ -411,20 +411,20 @@ class AccountInvoice(models.Model):
     # -------------------------
     # Hook post-validation
     # -------------------------
-    @api.model
-    def action_invoice_open(self):
-        # Appeler la méthode parente pour valider la facture
-        res = super(AccountInvoice, self).action_invoice_open()
+    # @api.model
+    # def action_invoice_open(self):
+    #     # Appeler la méthode parente pour valider la facture
+    #     res = super(AccountInvoice, self).action_invoice_open()
         
-        # Lecture du paramètre
-        config = self.env['ir.config_parameter'].sudo()
-        # Lire la valeur stockée (qui est une chaîne 'True'/'False') et la comparer
-        if config.get_param('fne.auto_send', 'False') == 'True':
-            # Utiliser la méthode existante pour envoyer à FNE
-            # On vérifie si la facture est bien validée avant l'envoi
-            self.filtered(lambda inv: inv.state == 'open').action_send_to_fne()
+    #     # Lecture du paramètre
+    #     config = self.env['ir.config_parameter'].sudo()
+    #     # Lire la valeur stockée (qui est une chaîne 'True'/'False') et la comparer
+    #     if config.get_param('fne.auto_send', 'False') == 'True':
+    #         # Utiliser la méthode existante pour envoyer à FNE
+    #         # On vérifie si la facture est bien validée avant l'envoi
+    #         self.filtered(lambda inv: inv.state == 'open').action_send_to_fne()
         
-        return res
+    #     return res
     
     def action_open_fne_link(self):
         self.ensure_one()
