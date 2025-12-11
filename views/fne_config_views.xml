@@ -29,7 +29,7 @@
             <field name="name">fne.config.settings.trees</field>
             <field name="model">fne.config.settings</field>
             <field name="arch" type="xml">
-                <tree string="Configuration FNE" create="false"  edit="false">
+                <tree string="Configuration FNE" >
                     <field name="fne_mode" string="Mode"/>
                     <field name="fne_api_key" string="API Key"/>
                     <field name="fne_test_url" string="URL Test"/>
