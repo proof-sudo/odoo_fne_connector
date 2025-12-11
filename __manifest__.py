@@ -8,7 +8,7 @@
     'category': 'Accounting',
     'depends': ['account', 'base'],
     'data': [
-        'security/ir.model.access.csv',
+        # 'security/ir.model.access.csv',
         'views/fne_actions.xml',
         # 'views/fne_menu.xml',
         'views/fne_config_views.xml',
