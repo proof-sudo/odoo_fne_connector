@@ -61,37 +61,22 @@ class AccountInvoice(models.Model):
         if partner.vat:
             return "B2B"
         return "B2C"
-    @api.multi # CHANGEMENT RECOMMANDÉ : api.multi est plus approprié pour les actions de bouton
+    
+    @api.multi
     def action_invoice_open(self):
+        # Appeler la méthode parente pour valider la facture (C'est là que l'erreur se produit si le contexte est corrompu)
+        res = super(AccountInvoice, self).action_invoice_open()
         
-        # --- DEBUT DEBOGAGE ---
-        _logger.info("--- DEBUT INSPECTION CONTEXTE ---")
-        
-        # Le contexte de l'environnement (env.context) est l'objet à auditer
-        current_context = self.env.context
-        
-        # Vérification 1: Le contexte est-il une séquence (liste/tuple) au lieu d'un dictionnaire ?
-        if not isinstance(current_context, dict):
-            _logger.error(f"FATAL ERROR: Le contexte global n'est pas un dictionnaire. Type trouvé: {current_context.__class__.__name__}")
-        else:
-            # Vérification 2: Y a-t-il une clé dans le dictionnaire qui a un objet Python complexe qui pourrait être mal sérialisé ?
-            for key, value in current_context.items():
-                if not isinstance(value, (str, int, float, bool, dict, list, tuple, type(None))):
-                     _logger.error(f"CONTEXT PROBLEM: Clé '{key}' a une valeur de type {value.__class__.__name__}. Valeur partielle: {str(value)[:50]}")
-        
-        _logger.info("--- FIN INSPECTION CONTEXTE ---")
-        # --- FIN DEBOGAGE ---
-        
-        # L'ERREUR DE TYPE SE PRODUIT LORS DE L'APPEL AU SUPER
-        res = super(AccountInvoice, self).action_invoice_open() 
-        
-        # ... (votre logique FNE) ...
+        # Lecture du paramètre
         config = self.env['ir.config_parameter'].sudo()
+        # Lire la valeur stockée (qui est une chaîne 'True'/'False') et la comparer
         if config.get_param('fne.auto_send', 'False') == 'True':
+            # Utiliser la méthode existante pour envoyer à FNE
+            # On vérifie si la facture est bien validée avant l'envoi
             self.filtered(lambda inv: inv.state == 'open').action_send_to_fne()
         
         return res
-
+   
     def _compute_custom_taxes(self):
         """Agrège les taxes non TVA (autres prélèvements) au niveau racine."""
         customs = {}
