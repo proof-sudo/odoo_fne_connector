@@ -154,6 +154,7 @@ class AccountInvoice(models.Model):
         # --- MEILLEURE PRATIQUE : Lecture directe du paramètre ---
         config = self.env['ir.config_parameter'].sudo()
         point_de_vente = config.get_param('fne.point_de_vente', default='').strip()
+        establishment = config.get_param('fne.establishment', default='').strip()
         # point_de_vente = config.get_param('fne.point_de_vente', 'Default Point of Sale')
         footer = config.get_param('fne.footer', default='<p>Merci pour votre confiance</p>').strip()
         # --------------------------------------------------------
@@ -163,15 +164,17 @@ class AccountInvoice(models.Model):
             "Veuillez le renseigner dans:\n"
             "Configuration > Paramètres > Section FNE > Point de Vente"
         ))
+        if not establishment:
+            establishment = invoice.company_id.name or "ENTREPRISE"
+        _logger.warning(f"[FNE] Établissement non configuré, utilisation du nom de société: {establishment}")
+
         _logger.info(f"[FNE] Point de vente utilisé: {point_de_vente}")
         _logger.info(f"[FNE] Footer: {footer[:50]}..." if len(footer) > 50 else f"[FNE] Footer: {footer}")
         # --- AJOUT DU LOGGING POUR LE DEBUGAGE (Point de Vente / Footer) ---
         _logger.info(f"[FNE DEBUG _prepare_base_payload]: Point de Vente = {point_de_vente}")
         # -------------------------------------------------------------------
 
-        if not point_de_vente:
-            raise UserError(_("Le point de vente n'est pas configuré pour le FNE."))
-
+        
         items = self._build_items()
         _logger.info(f"[FNE] Items préparés pour {invoice.name}: {items}")
         if not items:
@@ -204,10 +207,10 @@ class AccountInvoice(models.Model):
             "clientEmail": _clean_str(invoice.partner_id.email or ""),
             "clientSellerName": _clean_str(invoice.user_id.name or ""),
             "pointOfSale": point_de_vente,
-            "establishment": "NEURONES TECHNOLOGIES SA",
+            "establishment": establishment,
             # "establishment": _clean_str(invoice.company_id.name or ""),
             "commercialMessage":_truncate("Condition de paiement : " + (getattr(self.payment_term_id, "name", "") or ""),140),
-            "footer": _clean_str(footer),
+            "footer": footer,
             "foreignCurrency": "",
             "foreignCurrencyRate": 0,
             "items": items,
