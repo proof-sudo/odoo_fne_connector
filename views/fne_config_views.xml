@@ -7,146 +7,184 @@
         <record id="view_fne_config_settings_form" model="ir.ui.view">
             <field name="name">res.config.settings.view.form.inherit.fne</field>
             <field name="model">res.config.settings</field>
-            <field name="priority" eval="1"/>
+            <field name="priority" eval="90"/>
             <field name="inherit_id" ref="base.res_config_settings_view_form"/>
             <field name="arch" type="xml">
+                <!-- Injection dans les settings existants -->
                 <xpath expr="//div[hasclass('settings')]" position="inside">
-                    <div class="app_settings_block" data-string="FNE" string="FNE - Facturation Électronique" data-key="fne">
+                    <div class="app_settings_block" data-string="FNE" string="FNE" data-key="fne">
                         
-                        <!-- Titre -->
-                        <h2>Configuration de la Facturation Électronique Normée (FNE)</h2>
+                        <!-- Titre principal -->
+                        <h2>Facturation Électronique Normée (FNE)</h2>
                         
-                        <!-- Mode de fonctionnement -->
+                        <!-- Section 1 : Mode de fonctionnement -->
                         <div class="row mt16 o_settings_container">
-                            <div class="col-xs-12 col-md-6 o_setting_box">
-                                <div class="o_setting_left_pane">
-                                    <field name="fne_mode" widget="radio" options="{'horizontal': true}"/>
-                                </div>
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane"/>
                                 <div class="o_setting_right_pane">
-                                    <label for="fne_mode" string="Environnement"/>
-                                    <div class="text-muted">
-                                        Test : Environnement de développement<br/>
-                                        Production : Environnement réel DGI
+                                    <label for="fne_mode" string="Mode de fonctionnement"/>
+                                    <div class="text-muted mb16">
+                                        Sélectionnez l'environnement d'exécution
+                                    </div>
+                                    <div class="content-group">
+                                        <div class="mt16">
+                                            <field name="fne_mode" widget="radio" class="o_light_label"/>
+                                        </div>
+                                    </div>
+                                    <!-- Alerte contextuelle -->
+                                    <div class="mt16">
+                                        <div class="alert alert-warning" role="alert" attrs="{'invisible': [('fne_mode', '!=', 'test')]}">
+                                            <i class="fa fa-warning"/> Mode Test - Environnement de développement
+                                        </div>
+                                        <div class="alert alert-danger" role="alert" attrs="{'invisible': [('fne_mode', '!=', 'prod')]}">
+                                            <i class="fa fa-exclamation-triangle"/> Mode Production - Environnement réel DGI
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Bandeau d'alerte selon le mode -->
-                        <div class="row mt16">
-                            <div class="col-xs-12">
-                                <div class="alert alert-warning" role="alert" attrs="{'invisible': [('fne_mode', '!=', 'test')]}">
-                                    <strong>⚠️ Mode Test activé</strong> - Les factures ne seront pas envoyées à la DGI de production.
-                                </div>
-                                <div class="alert alert-danger" role="alert" attrs="{'invisible': [('fne_mode', '!=', 'prod')]}">
-                                    <strong>🔴 Mode Production</strong> - Les factures seront envoyées directement à la DGI.
-                                </div>
+                        <!-- Section 2 : Authentification -->
+                        <div class="row mt32 o_settings_container" name="fne_auth_section">
+                            <div class="col-12">
+                                <h3>Authentification API</h3>
                             </div>
                         </div>
-
-                        <!-- Connexion API -->
-                        <h3 class="mt32">🔐 Connexion API</h3>
+                        
                         <div class="row mt16 o_settings_container">
-                            <div class="col-xs-12 col-md-6 o_setting_box">
+                            <div class="col-12 col-lg-6 o_setting_box">
                                 <div class="o_setting_left_pane"/>
                                 <div class="o_setting_right_pane">
-                                    <label for="fne_api_key" string="Clé API FNE"/>
+                                    <label for="fne_api_key" string="Clé API"/>
                                     <div class="text-muted">
                                         Clé d'authentification fournie par la DGI
                                     </div>
-                                    <div class="content-group mt16">
-                                        <field name="fne_api_key" password="True" placeholder="Entrez votre clé API..." class="oe_inline"/>
+                                    <div class="content-group">
+                                        <div class="mt16">
+                                            <field name="fne_api_key" password="True" placeholder="Entrez votre clé API..." class="o_input"/>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div class="col-xs-12 col-md-6 o_setting_box">
+                            <div class="col-12 col-lg-6 o_setting_box">
                                 <div class="o_setting_left_pane">
                                     <field name="fne_auto_send"/>
                                 </div>
                                 <div class="o_setting_right_pane">
-                                    <label for="fne_auto_send" string="Envoi automatique"/>
+                                    <label for="fne_auto_send"/>
                                     <div class="text-muted">
-                                        Certification automatique après validation des factures
+                                        Les factures seront certifiées automatiquement après validation
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- URLs des services -->
+                        <!-- Section 3 : URLs des services -->
+                        <div class="row mt32 o_settings_container" name="fne_urls_section">
+                            <div class="col-12">
+                                <h3>URLs des services</h3>
+                            </div>
+                        </div>
+                        
                         <div class="row mt16 o_settings_container">
-                            <div class="col-xs-12 col-md-6 o_setting_box">
+                            <div class="col-12 col-lg-6 o_setting_box">
                                 <div class="o_setting_left_pane"/>
                                 <div class="o_setting_right_pane">
                                     <label for="fne_test_url" string="URL Test"/>
                                     <div class="text-muted">
-                                        URL de l'API FNE en environnement de test
+                                        URL de l'API FNE pour l'environnement de test
                                     </div>
-                                    <div class="content-group mt16">
-                                        <field name="fne_test_url" placeholder="http://54.247.95.108/ws"/>
+                                    <div class="content-group">
+                                        <div class="mt16">
+                                            <field name="fne_test_url" placeholder="http://54.247.95.108/ws" class="o_input"/>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div class="col-xs-12 col-md-6 o_setting_box">
+                            <div class="col-12 col-lg-6 o_setting_box">
                                 <div class="o_setting_left_pane"/>
                                 <div class="o_setting_right_pane">
                                     <label for="fne_prod_url" string="URL Production"/>
                                     <div class="text-muted">
-                                        URL de l'API FNE en environnement de production
+                                        URL de l'API FNE pour l'environnement de production
                                     </div>
-                                    <div class="content-group mt16">
-                                        <field name="fne_prod_url" placeholder="https://www.services.fne.dgi.gouv.ci/ws"/>
+                                    <div class="content-group">
+                                        <div class="mt16">
+                                            <field name="fne_prod_url" placeholder="https://www.services.fne.dgi.gouv.ci/ws" class="o_input"/>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Configuration métier -->
-                        <h3 class="mt32">🏢 Configuration Métier</h3>
+                        <!-- Section 4 : Configuration métier -->
+                        <div class="row mt32 o_settings_container" name="fne_business_section">
+                            <div class="col-12">
+                                <h3>Configuration métier</h3>
+                            </div>
+                        </div>
+                        
                         <div class="row mt16 o_settings_container">
-                            <div class="col-xs-12 col-md-6 o_setting_box">
+                            <div class="col-12 col-lg-6 o_setting_box">
                                 <div class="o_setting_left_pane"/>
                                 <div class="o_setting_right_pane">
                                     <label for="fne_point_de_vente" string="Point de Vente"/>
                                     <div class="text-muted">
-                                        Identifiant de votre établissement (ex: SIEGE NEURONES)
+                                        Identifiant de votre établissement (obligatoire)
                                     </div>
-                                    <div class="content-group mt16">
-                                        <field name="fne_point_de_vente" placeholder="SIEGE NEURONES"/>
+                                    <div class="content-group">
+                                        <div class="mt16">
+                                            <field name="fne_point_de_vente" placeholder="Ex: SIEGE NEURONES" class="o_input" required="1"/>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Footer personnalisé -->
+                        <!-- Section 5 : Footer personnalisé -->
+                        <div class="row mt32 o_settings_container" name="fne_footer_section">
+                            <div class="col-12">
+                                <h3>Pied de page des factures</h3>
+                            </div>
+                        </div>
+                        
                         <div class="row mt16 o_settings_container">
-                            <div class="col-xs-12 o_setting_box">
+                            <div class="col-12 o_setting_box">
                                 <div class="o_setting_left_pane"/>
                                 <div class="o_setting_right_pane">
-                                    <label for="fne_footer" string="Pied de page FNE"/>
+                                    <label for="fne_footer" string="Message personnalisé"/>
                                     <div class="text-muted">
-                                        Message personnalisé affiché sur les factures certifiées
+                                        Message HTML affiché en bas des factures certifiées
                                     </div>
-                                    <div class="content-group mt16">
-                                        <field name="fne_footer" widget="html" placeholder="&lt;p&gt;Merci pour votre confiance&lt;/p&gt;"/>
+                                    <div class="content-group">
+                                        <div class="mt16">
+                                            <field name="fne_footer" 
+                                                   widget="html" 
+                                                   placeholder="&lt;p&gt;Merci pour votre confiance&lt;/p&gt;"
+                                                   options="{'style-inline': true}"/>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Aide et informations -->
-                        <div class="row mt32">
-                            <div class="col-xs-12">
+                        <!-- Section 6 : Aide -->
+                        <div class="row mt32 o_settings_container">
+                            <div class="col-12">
                                 <div class="alert alert-info" role="alert">
-                                    <h4 class="alert-heading">
+                                    <h4>
                                         <i class="fa fa-info-circle"/> Comment obtenir votre clé API ?
                                     </h4>
-                                    <ol class="mb-0">
+                                    <ol>
                                         <li>Contactez la Direction Générale des Impôts (DGI) de Côte d'Ivoire</li>
                                         <li>Demandez votre inscription au service de Facturation Électronique Normée</li>
                                         <li>Recevez vos identifiants pour les environnements Test et Production</li>
                                     </ol>
+                                    <p class="mb-0">
+                                        <strong>Support :</strong> Pour toute assistance technique, contactez le support DGI.
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -157,9 +195,9 @@
         </record>
 
         <!-- ========================================== -->
-        <!-- Action                                     -->
+        <!-- Action pour ouvrir la configuration        -->
         <!-- ========================================== -->
-        <record id="action_fne_config_settingss" model="ir.actions.act_window">
+        <record id="action_fne_config_settings" model="ir.actions.act_window">
             <field name="name">Configuration FNE</field>
             <field name="res_model">res.config.settings</field>
             <field name="view_mode">form</field>
@@ -177,9 +215,9 @@
                   groups="base.group_system"/>
 
         <menuitem id="menu_fne_config_settings"
-                  name="Paramètres FNE"
+                  name="Paramètres"
                   parent="menu_fne_config_root"
-                  action="action_fne_config_settingss" 
+                  action="action_fne_config_settings" 
                   sequence="10"
                   groups="base.group_system"/>
 
