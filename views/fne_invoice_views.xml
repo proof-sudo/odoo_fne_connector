@@ -14,18 +14,7 @@
 
                 <!-- Champs de statut invisibles mais nécessaires pour les conditions -->
                 <header position="inside">
-                    <field name="fne_sent" invisible="1"/>
-                    <field name="fne_verification_url" invisible="1"/>
-                    <field name="state" invisible="1"/>
-                    <field name="fne_warning" invisible="1"/>
-                    <field name="fne_balance_sticker" invisible="1"/>
-                </header>
 
-                <!-- Zone d'en-tête (Header) -->
-                <header position="inside">
-
-                    <!-- ✅ ODOO 16 : attrs → invisible avec nouvelle syntaxe Python -->
-                    <!-- Bouton Création FNE (Visible si non envoyé et état != brouillon/annulé) -->
                     <button name="action_send_to_fne"
                         string="Créer FNE"
                         type="object"
@@ -33,7 +22,6 @@
                         invisible="fne_sent or state in ('draft', 'cancel')"
                     />
 
-                    <!-- Bouton Voir FNE (Visible si envoyé) -->
                     <button name="action_open_fne_link"
                         string="Voir FNE"
                         type="object"
@@ -41,11 +29,10 @@
                         invisible="not fne_sent"
                     />
 
-                    <!-- Avertissement FNE -->
                     <label string="Attention: La DGI a renvoyé un avertissement pour cette facture."
+                        class="o_form_label"
                         invisible="not fne_warning"
-                        style="color: orange; font-weight: bold; margin-left: 10px;"
-                    />
+                        style="color: orange; font-weight: bold; margin-left: 10px;"/>
 
                 </header>
 
