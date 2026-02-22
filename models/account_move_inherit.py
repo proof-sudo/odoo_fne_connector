@@ -276,7 +276,144 @@ class AccountMove(models.Model):
         refund_move.fne_balance_sticker = int(data.get("balance_sticker") or 0)
         _logger.info(f'[FNE] Avoir {refund_move.name} certifié avec succès. Réponse DGI : {data}')
         return data
+    def _apply_sign_success(self, data):
+        self.fne_sent = True
+        self.fne_reference_dgi = data.get("reference") or False
+        self.fne_verification_url = data.get("token") or False
+        self.fne_warning = bool(data.get("warning"))
+        self.fne_balance_sticker = int(data.get("balance_sticker") or 0)
+        _logger.info(f'[FNE] Facture {self.name} certifiée avec succès. Réponse DGI : {data}')
 
+        self.invoice_id_from_fne = data.get("id") or data.get("invoice", {}).get("id") or self.invoice_id_from_fne
+        items = data.get("invoice", {}).get("items", [])
+        
+        # Mapping des ID d'items FNE aux lignes de facture Odoo par référence/produit (plus fiable)
+        for fne_item in items:
+            fne_item_id = fne_item.get("id")
+            # Une implémentation plus robuste serait de mapper par la référence que vous avez envoyée
+            # Mais en l'absence de référence unique, on se base sur l'ordre/description (moins fiable)
+            # Puisque l'API retourne les items dans l'ordre, nous utilisons l'index comme fallback
+            
+            # Recherche de la ligne Odoo non-affichable
+            try:
+                line_index = items.index(fne_item)
+                # Utiliser l'index pour trouver la ligne Odoo correspondante
+                line = self.invoice_line_ids.filtered(lambda l: l.product_id)[line_index]
+                if fne_item_id:
+                    line.fne_item_id = fne_item_id
+                else:
+                    _logger.warning(f"[FNE] Aucun ID trouvé pour l’item {line_index} de la facture {self.name}")
+            except IndexError:
+                 _logger.warning(f"[FNE] Pas assez d’items retournés par la DGI pour mapper toutes les lignes de la facture {self.name}")
+            except Exception as e:
+                _logger.warning(f"[FNE] Erreur de mapping d'item FNE pour {self.name}: {e}")
+                
+    
+    
+    def _request_fne(self, method, url, headers, json_body=None, retries=2, timeout=30):
+        last_err = None
+        for attempt in range(retries + 1):
+            try:
+                resp = requests.request(method, url, headers=headers, json=json_body, timeout=timeout)
+                try:
+                    data = resp.json()
+                except ValueError:
+                    data = {"raw_response": _truncate(resp.text, 200) } # Troncature pour les logs
+
+                if resp.status_code in (200, 201):
+                    return data
+                if 500 <= resp.status_code < 600 and attempt < retries:
+                    _logger.warning(f"[FNE] Tentative {attempt+1}/{retries+1} : Erreur 5xx. Nouvelle tentative dans {2 ** attempt}s.")
+                    time.sleep(2 ** attempt)
+                    continue
+                raise UserError(_("FNE %s %s : %s - %s") % (method, url, resp.status_code, data))
+            except requests.RequestException as e:
+                last_err = e
+                if attempt < retries:
+                    _logger.warning(f"[FNE] Tentative {attempt+1}/{retries+1} : Erreur réseau. Nouvelle tentative dans {2 ** attempt}s.")
+                    time.sleep(2 ** attempt)
+                    continue
+                raise UserError(_("Erreur réseau FNE %s %s : %s") % (method, url, str(e)))
+        raise last_err # Devrait être atteint après la boucle
+                
+    def action_send_to_fne(self):
+        self.ensure_one()
+        
+        # --- MEILLEURE PRATIQUE : Lecture directe du paramètre ---
+        config = self.env['ir.config_parameter'].sudo()
+        api_key = config.get_param('fne.api_key', default='').strip()
+        # api_key ="6kXovg6Cb2zwxWv39dc8wDPrHto5nzAh2Zdvdssss"
+        mode = (config.get_param('fne.mode', default='test') or 'test').lower().strip()
+        if not api_key:
+            raise UserError(_(
+                "La clé API FNE n'est pas configurée.\n\n"
+                "Veuillez configurer le module FNE dans:\n"
+                "Configuration > Paramètres > Section FNE"
+            ))
+        # base_url =  "https://www.services.fne.dgi.gouv.ci/ws"
+        if mode == 'prod':
+            base_url = config.get_param('fne.prod_url', default='https://www.services.fne.dgi.gouv.ci/ws')
+        else:
+            base_url = config.get_param('fne.test_url', default='http://54.247.95.108/ws')
+            # --------------------------------------------------------
+        if not base_url or not base_url.strip():
+            raise UserError(_(
+            "L'URL de l'API FNE n'est pas configurée pour le mode '%s'.\n\n"
+            "Veuillez configurer le module FNE dans:\n"
+            "Configuration > Paramètres > Section FNE"
+        ) % mode)
+    
+        base_url = base_url.strip()
+        # --- AJOUT DU LOGGING POUR LE DEBUGAGE (API Key / Mode / URL) ---
+        _logger.info("=" * 70)
+        _logger.info("[FNE] Configuration chargée:")
+        _logger.info(f"  - Mode: {mode}")
+        _logger.info(f"  - API Key: {'*' * (len(api_key) - 4) + api_key[-4:] if len(api_key) > 4 else '***'}")
+        _logger.info(f"  - Base URL: {base_url}")
+        _logger.info("=" * 70)
+
+        headers = {
+            'Authorization': f"Bearer {api_key}",
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        }
+        endpoint_sign = base_url.rstrip('/') + "/external/invoices/sign"
+
+        for inv in self:
+            try:
+                if inv.fne_sent:
+                    _logger.info("[FNE] %s déjà certifiée.", inv.name)
+                    continue
+
+                if inv.type in ('out_invoice',):
+                    payload = inv._prepare_payload_sale()
+                    _logger.info("[FNE] SIGN %s payload=%s", inv.name, payload)
+                    data = inv._request_fne("POST", endpoint_sign, headers, json_body=payload)
+                    inv._apply_sign_success(data)
+
+                elif inv.type in ('in_invoice',):
+                    payload = inv._prepare_payload_purchase_agri()
+                    _logger.info("[FNE] SIGN (purchase) %s payload=%s", inv.name, payload)
+                    data = inv._request_fne("POST", endpoint_sign, headers, json_body=payload)
+                    inv._apply_sign_success(data)
+
+                elif inv.type in ('out_refund',):
+                    inv._post_refund_to_fne(headers, base_url)
+
+                elif inv.type in ('in_refund', 'in_receipt'):
+                    _logger.info("[FNE] %s ignorée (type %s). Ce type de document n'est pas géré par l'envoi FNE.", inv.name, inv.type)
+                    continue
+
+                else:
+                    _logger.info("[FNE] %s ignorée (type %s).", inv.name, inv.type)
+
+            except UserError as ue:
+                _logger.error("[FNE] Erreur Utilisateur %s : %s", inv.name, ue.name)
+                raise
+            except Exception as e:
+                _logger.exception("[FNE] Exception non gérée lors de l'envoi de %s", inv.name)
+                raise
+            
     def action_open_fne_link(self):
         self.ensure_one()
         if self.fne_verification_url:
