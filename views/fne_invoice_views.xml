@@ -11,10 +11,9 @@
             <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">
 
-                <!-- Injection dans le header -->
+                <!-- Injection Header -->
                 <xpath expr="//header" position="inside">
 
-                    <!-- Charger les champs pour conditions -->
                     <field name="fne_sent" invisible="1"/>
                     <field name="fne_warning" invisible="1"/>
 
@@ -37,12 +36,12 @@
 
                 </xpath>
 
-                <!-- Ajout champ mode paiement -->
+                <!-- Mode paiement -->
                 <xpath expr="//field[@name='invoice_payment_term_id']" position="after">
                     <field name="modes_paiement"/>
                 </xpath>
 
-                <!-- Bloc Informations FNE -->
+                <!-- Bloc Infos FNE -->
                 <xpath expr="//notebook" position="before">
                     <div class="oe_read_only" invisible="fne_sent == False">
                         <group string="Informations de Certification FNE / DGI">
@@ -65,26 +64,14 @@
             <field name="inherit_id" ref="account.view_move_tree"/>
             <field name="arch" type="xml">
 
+                <!-- Décoration ligne si FNE envoyée -->
                 <xpath expr="//tree" position="attributes">
                     <attribute name="decoration-success">fne_sent</attribute>
                 </xpath>
 
+                <!-- Charger champ pour décoration -->
                 <xpath expr="//tree" position="inside">
-
                     <field name="fne_sent" column_invisible="1"/>
-
-                    <button name="action_send_to_fne"
-                            string="Créer FNE"
-                            type="object"
-                            icon="fa-upload"
-                            invisible="fne_sent == True"/>
-
-                    <button name="action_open_fne_link"
-                            string="Voir FNE"
-                            type="object"
-                            icon="fa-eye"
-                            invisible="fne_sent == False"/>
-
                 </xpath>
 
             </field>
