@@ -2,15 +2,17 @@
 <odoo>
     <data>
         <!-- ************************************************************ -->
-        <!-- 1. Héritage de la Vue Formulaire (Boutons et Champs Infos) -->
+        <!-- 1. Héritage de la Vue Formulaire (Boutons et Champs Infos)    -->
         <!-- ************************************************************ -->
         <record id="view_move_form_inherit_fne_main" model="ir.ui.view">
-            <field name="name">account.invoice.form.inherit.fne.main</field>
-            <field name="model">account.invoice</field>
-            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="name">account.move.form.inherit.fne.main</field>
+            <!-- ✅ ODOO 16 : account.invoice → account.move -->
+            <field name="model">account.move</field>
+            <!-- ✅ ODOO 16 : account.invoice_form → account.view_move_form -->
+            <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">
-                
-                <!-- Champs de statut (rendus invisibles mais nécessaires pour les conditions) -->
+
+                <!-- Champs de statut invisibles mais nécessaires pour les conditions -->
                 <header position="inside">
                     <field name="fne_sent" invisible="1"/>
                     <field name="fne_verification_url" invisible="1"/>
@@ -21,13 +23,14 @@
 
                 <!-- Zone d'en-tête (Header) -->
                 <header position="inside">
-                    
-                    <!-- Bouton Création FNE (Visible si non envoyé, état n'est pas Brouillon/Annulé) -->
+
+                    <!-- ✅ ODOO 16 : attrs → invisible avec nouvelle syntaxe Python -->
+                    <!-- Bouton Création FNE (Visible si non envoyé et état != brouillon/annulé) -->
                     <button name="action_send_to_fne"
                         string="Créer FNE"
                         type="object"
                         class="btn-primary"
-                        attrs="{'invisible': ['|', '|', ('fne_sent', '=', True), ('state', 'in', ['draft', 'cancel'])]}"
+                        invisible="fne_sent or state in ('draft', 'cancel')"
                     />
 
                     <!-- Bouton Voir FNE (Visible si envoyé) -->
@@ -35,29 +38,29 @@
                         string="Voir FNE"
                         type="object"
                         class="oe_highlight"
-                        attrs="{'invisible': [('fne_sent', '!=', True)]}"
+                        invisible="not fne_sent"
                     />
-                    
-                    <!-- Affichage de l'avertissement FNE si présent -->
+
+                    <!-- Avertissement FNE -->
                     <label string="Attention: La DGI a renvoyé un avertissement pour cette facture."
-                        attrs="{'invisible': [('fne_warning', '!=', True)]}"
+                        invisible="not fne_warning"
                         style="color: orange; font-weight: bold; margin-left: 10px;"
                     />
 
                 </header>
-                <xpath expr="//field[@name='payment_term_id']" position="after">
+
+                <!-- ✅ ODOO 16 : payment_term_id existe toujours sur account.move -->
+                <xpath expr="//field[@name='invoice_payment_term_id']" position="after">
                     <field name="modes_paiement"/>
                 </xpath>
-                
-              
 
-                <!-- Affichage des informations de référence DGI -->
+                <!-- Informations de certification DGI -->
                 <notebook position="before">
-                    <div class="oe_read_only" attrs="{'invisible': [('fne_sent', '!=', True)]}">
+                    <div class="oe_read_only" invisible="not fne_sent">
                         <group name="fne_dgi_info" string="Informations de Certification FNE / DGI">
                             <field name="fne_reference_dgi"/>
                             <field name="fne_balance_sticker" string="Solde Sticker FNE"/>
-                            <field name="fne_warning" readonly="1" string="Avertissement DGI" attrs="{'invisible': [('fne_warning', '!=', True)]}"/>
+                            <field name="fne_warning" readonly="1" string="Avertissement DGI" invisible="not fne_warning"/>
                         </group>
                     </div>
                 </notebook>
@@ -66,40 +69,39 @@
         </record>
 
         <!-- ************************************************************ -->
-        <!-- 2. Héritage de la Vue Liste (Tree View) -->
+        <!-- 2. Héritage de la Vue Liste (Tree View)                       -->
         <!-- ************************************************************ -->
         <record id="view_invoice_tree_inherit_fne" model="ir.ui.view">
-            <field name="name">account.invoice.tree.inherit.fne</field>
-            <field name="model">account.invoice</field>
-            <field name="inherit_id" ref="account.invoice_tree"/>
+            <field name="name">account.move.tree.inherit.fne</field>
+            <!-- ✅ ODOO 16 : account.invoice → account.move -->
+            <field name="model">account.move</field>
+            <!-- ✅ ODOO 16 : account.invoice_tree → account.view_move_tree -->
+            <field name="inherit_id" ref="account.view_move_tree"/>
             <field name="arch" type="xml">
-                
-                <!-- Décoration de ligne si la facture est certifiée -->
+
                 <xpath expr="//tree" position="attributes">
-                    <!-- Note: La syntaxe Odoo 11 utilise 'decoration-success' -->
-                    <attribute name="decoration-success">fne_sent==True</attribute>
+                    <attribute name="decoration-success">fne_sent == True</attribute>
                 </xpath>
-                
+
                 <xpath expr="//tree" position="inside">
-                    <field name="fne_sent" invisible="1"/>
-                    
-                    <!-- Bouton Créer FNE dans la liste (seulement si non envoyé) -->
-                    <button name="action_send_to_fne" 
-                            string="Créer FNE" 
-                            type="object" 
-                            icon="fa-upload" 
-                            attrs="{'invisible': [('fne_sent', '=', True)]}"
+                    <field name="fne_sent" column_invisible="1"/>
+
+                    <!-- ✅ ODOO 16 : attrs → invisible -->
+                    <button name="action_send_to_fne"
+                            string="Créer FNE"
+                            type="object"
+                            icon="fa-upload"
+                            invisible="fne_sent"
                     />
-                    
-                    <!-- Bouton Voir FNE dans la liste (seulement si envoyé) -->
+
                     <button name="action_open_fne_link"
                             type="object"
                             string="Voir FNE"
                             icon="fa-eye"
-                            attrs="{'invisible': [('fne_sent', '!=', True)]}"
+                            invisible="not fne_sent"
                     />
                 </xpath>
-                
+
             </field>
         </record>
 
