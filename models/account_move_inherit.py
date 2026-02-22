@@ -40,6 +40,7 @@ class AccountMove(models.Model):
     invoice_id_from_fne = fields.Char(string="ID FNE", readonly=True, copy=False)
     fne_warning = fields.Boolean(string="Avertissement FNE", readonly=True, copy=False)
     fne_balance_sticker = fields.Integer(string="Solde sticker FNE", readonly=True, copy=False)
+    fne_mode = fields.Char(compute='_compute_fne_mode', string="Mode FNE")
     modes_paiement = fields.Selection(
         selection=[
             ('mobile_money', 'Mobile Money'),
@@ -53,6 +54,11 @@ class AccountMove(models.Model):
         default='cheque',
         help="Sélectionnez le mode de paiement pour la facture."
     )
+    def _compute_fne_mode(self):
+        """Récupère dynamiquement le mode configuré dans les paramètres système"""
+        mode = self.env['ir.config_parameter'].sudo().get_param('fne.mode', default='test')
+        for record in self:
+            record.fne_mode = mode
 
     def _detect_template(self):
         partner = self.partner_id
@@ -385,27 +391,27 @@ class AccountMove(models.Model):
                     _logger.info("[FNE] %s déjà certifiée.", inv.name)
                     continue
 
-                if inv.type in ('out_invoice',):
+                if inv.move_type in ('out_invoice',):
                     payload = inv._prepare_payload_sale()
                     _logger.info("[FNE] SIGN %s payload=%s", inv.name, payload)
                     data = inv._request_fne("POST", endpoint_sign, headers, json_body=payload)
                     inv._apply_sign_success(data)
 
-                elif inv.type in ('in_invoice',):
+                elif inv.move_type in ('in_invoice',):
                     payload = inv._prepare_payload_purchase_agri()
                     _logger.info("[FNE] SIGN (purchase) %s payload=%s", inv.name, payload)
                     data = inv._request_fne("POST", endpoint_sign, headers, json_body=payload)
                     inv._apply_sign_success(data)
 
-                elif inv.type in ('out_refund',):
+                elif inv.move_type in ('out_refund',):
                     inv._post_refund_to_fne(headers, base_url)
 
-                elif inv.type in ('in_refund', 'in_receipt'):
-                    _logger.info("[FNE] %s ignorée (type %s). Ce type de document n'est pas géré par l'envoi FNE.", inv.name, inv.type)
+                elif inv.move_type in ('in_refund', 'in_receipt'):
+                    _logger.info("[FNE] %s ignorée (type %s). Ce type de document n'est pas géré par l'envoi FNE.", inv.name, inv.move_type)
                     continue
 
                 else:
-                    _logger.info("[FNE] %s ignorée (type %s).", inv.name, inv.type)
+                    _logger.info("[FNE] %s ignorée (type %s).", inv.name, inv.move_type)
 
             except UserError as ue:
                 _logger.error("[FNE] Erreur Utilisateur %s : %s", inv.name, ue.name)
