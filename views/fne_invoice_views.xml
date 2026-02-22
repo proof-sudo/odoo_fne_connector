@@ -2,47 +2,45 @@
 <odoo>
     <data>
 
-        <!-- ************************************************************ -->
-        <!-- 1. Héritage de la Vue Formulaire -->
-        <!-- ************************************************************ -->
+        <!-- ============================================================ -->
+        <!-- 1. Héritage Form View account.move -->
+        <!-- ============================================================ -->
         <record id="view_move_form_inherit_fne_main" model="ir.ui.view">
             <field name="name">account.move.form.inherit.fne.main</field>
             <field name="model">account.move</field>
             <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">
 
-                <!-- Header -->
-                <header position="inside">
+                <!-- Injection propre dans le header -->
+                <xpath expr="//header" position="inside">
 
-                    <!-- Champs nécessaires pour les conditions -->
+                    <!-- Champs nécessaires aux conditions -->
                     <field name="fne_sent" invisible="1"/>
                     <field name="fne_warning" invisible="1"/>
 
-                    <!-- Bouton Création FNE -->
+                    <!-- Bouton Créer FNE -->
                     <button name="action_send_to_fne"
                             string="Créer FNE"
                             type="object"
                             class="btn-primary"
-                            invisible="fne_sent or state in ('draft', 'cancel')"
-                    />
+                            invisible="fne_sent or state in ('draft', 'cancel')"/>
 
                     <!-- Bouton Voir FNE -->
                     <button name="action_open_fne_link"
                             string="Voir FNE"
                             type="object"
                             class="oe_highlight"
-                            invisible="not fne_sent"
-                    />
+                            invisible="not fne_sent"/>
 
-                    <!-- Avertissement -->
-                    <label string="Attention : La DGI a renvoyé un avertissement pour cette facture."
-                           class="o_form_label"
-                           invisible="not fne_warning"
-                           style="color: orange; font-weight: bold; margin-left: 10px;"/>
+                    <!-- Alerte -->
+                    <div class="alert alert-warning"
+                         invisible="not fne_warning">
+                        La DGI a renvoyé un avertissement pour cette facture.
+                    </div>
 
-                </header>
+                </xpath>
 
-                <!-- Ajout du mode de paiement -->
+                <!-- Ajout champ mode paiement -->
                 <xpath expr="//field[@name='invoice_payment_term_id']" position="after">
                     <field name="modes_paiement"/>
                 </xpath>
@@ -64,39 +62,36 @@
             </field>
         </record>
 
-        <!-- ************************************************************ -->
-        <!-- 2. Héritage de la Vue Liste (Tree View) -->
-        <!-- ************************************************************ -->
+        <!-- ============================================================ -->
+        <!-- 2. Héritage Tree View account.move -->
+        <!-- ============================================================ -->
         <record id="view_invoice_tree_inherit_fne" model="ir.ui.view">
             <field name="name">account.move.tree.inherit.fne</field>
             <field name="model">account.move</field>
             <field name="inherit_id" ref="account.view_move_tree"/>
             <field name="arch" type="xml">
 
-                <!-- Décoration ligne si FNE envoyée -->
+                <!-- Décoration si envoyé -->
                 <xpath expr="//tree" position="attributes">
                     <attribute name="decoration-success">fne_sent</attribute>
                 </xpath>
 
-                <!-- Boutons dans la liste -->
+                <!-- Ajout boutons -->
                 <xpath expr="//tree" position="inside">
 
-                    <!-- Champ requis pour conditions -->
                     <field name="fne_sent" column_invisible="1"/>
 
                     <button name="action_send_to_fne"
                             string="Créer FNE"
                             type="object"
                             icon="fa-upload"
-                            invisible="fne_sent"
-                    />
+                            invisible="fne_sent"/>
 
                     <button name="action_open_fne_link"
                             string="Voir FNE"
                             type="object"
                             icon="fa-eye"
-                            invisible="not fne_sent"
-                    />
+                            invisible="not fne_sent"/>
 
                 </xpath>
 
