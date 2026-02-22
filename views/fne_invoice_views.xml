@@ -11,30 +11,27 @@
             <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">
 
-                <!-- Injection propre dans le header -->
+                <!-- Injection dans le header -->
                 <xpath expr="//header" position="inside">
 
-                    <!-- Champs nécessaires aux conditions -->
+                    <!-- Charger les champs pour conditions -->
                     <field name="fne_sent" invisible="1"/>
                     <field name="fne_warning" invisible="1"/>
 
-                    <!-- Bouton Créer FNE -->
                     <button name="action_send_to_fne"
                             string="Créer FNE"
                             type="object"
                             class="btn-primary"
-                            invisible="fne_sent or state in ('draft', 'cancel')"/>
+                            invisible="fne_sent == True or state in ('draft', 'cancel')"/>
 
-                    <!-- Bouton Voir FNE -->
                     <button name="action_open_fne_link"
                             string="Voir FNE"
                             type="object"
                             class="oe_highlight"
-                            invisible="not fne_sent"/>
+                            invisible="fne_sent == False"/>
 
-                    <!-- Alerte -->
                     <div class="alert alert-warning"
-                         invisible="not fne_warning">
+                         invisible="fne_warning == False">
                         La DGI a renvoyé un avertissement pour cette facture.
                     </div>
 
@@ -47,14 +44,11 @@
 
                 <!-- Bloc Informations FNE -->
                 <xpath expr="//notebook" position="before">
-                    <div class="oe_read_only" invisible="not fne_sent">
+                    <div class="oe_read_only" invisible="fne_sent == False">
                         <group string="Informations de Certification FNE / DGI">
                             <field name="fne_reference_dgi"/>
-                            <field name="fne_balance_sticker" string="Solde Sticker FNE"/>
-                            <field name="fne_warning"
-                                   string="Avertissement DGI"
-                                   readonly="1"
-                                   invisible="not fne_warning"/>
+                            <field name="fne_verification_url"/>
+                            <field name="invoice_id_from_fne"/>
                         </group>
                     </div>
                 </xpath>
@@ -71,12 +65,10 @@
             <field name="inherit_id" ref="account.view_move_tree"/>
             <field name="arch" type="xml">
 
-                <!-- Décoration si envoyé -->
                 <xpath expr="//tree" position="attributes">
                     <attribute name="decoration-success">fne_sent</attribute>
                 </xpath>
 
-                <!-- Ajout boutons -->
                 <xpath expr="//tree" position="inside">
 
                     <field name="fne_sent" column_invisible="1"/>
@@ -85,13 +77,13 @@
                             string="Créer FNE"
                             type="object"
                             icon="fa-upload"
-                            invisible="fne_sent"/>
+                            invisible="fne_sent == True"/>
 
                     <button name="action_open_fne_link"
                             string="Voir FNE"
                             type="object"
                             icon="fa-eye"
-                            invisible="not fne_sent"/>
+                            invisible="fne_sent == False"/>
 
                 </xpath>
 
