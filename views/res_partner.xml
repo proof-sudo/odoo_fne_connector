@@ -6,12 +6,10 @@
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//group[.//field[@name='vat']]" position="inside">
-                    <group>
-                        <field name="templateFne"/>
-                        <field name="regimeFiscal"/>
-                    </group>
-                </xpath>
+               <xpath expr="//field[@name='vat']" position="after">
+                <field name="templateFne"/>
+                <field name="regimeFiscal"/>
+            </xpath>
             </field>
         </record>
     </data>
